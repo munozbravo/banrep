@@ -17,8 +17,7 @@ def create_sibling_dir(dirpath, newdir):
 
     Returns
     -------
-    Path
-       Nuevo directorio
+    :return: Path (Nuevo directorio)
     """
     initial = Path(dirpath)
     parent = initial.parent
@@ -39,7 +38,7 @@ def extract(filepath):
 
     Returns
     -------
-    tuple
+    :return: tuple (Texto, Metadata)
     """
     try:
         parsed = parser.from_file(str(filepath))
