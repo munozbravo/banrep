@@ -7,17 +7,21 @@ from tika import parser
 
 
 def create_sibling_dir(dirpath, newdir):
-    """
-    Crea directorio `newdir` al mismo nivel de `dirpath`.
+    """Crea nuevo directorio al mismo nivel de uno existente.
+
+    Crea `newdir` al mismo nivel de `dirpath`.
 
     Parameters
     ----------
-    :param dirpath: str
-    :param newdir: str
+    dirpath : str
+        Directorio inicial existente.
+    newdir : str
+        Nombre de nuevo directorio a crear.
 
     Returns
     -------
-    :return: Path (Nuevo directorio)
+    Path
+        Nuevo directorio.
     """
     initial = Path(dirpath)
     parent = initial.parent
@@ -29,16 +33,19 @@ def create_sibling_dir(dirpath, newdir):
 
 
 def extract(filepath):
-    """
-    Extrae texto y metadata de archivo en `filepath`.
+    """Extrae texto y metadata de archivo.
+
+    Archivo ubicado en `filepath`.
 
     Parameters
     ----------
-    :param filepath: str|Path
+    filepath : str or Path
+        Ruta del archivo del cual se quiere extraer info.
 
     Returns
     -------
-    :return: tuple (Texto, Metadata)
+    tuple (str, dict)
+        Texto y Metadata extraídos.
     """
     try:
         parsed = parser.from_file(str(filepath))
@@ -54,13 +61,20 @@ def extract(filepath):
 
 
 def save_text(text, filepath):
-    """
-    Almacena `text` en `filepath`.
+    """Guarda texto en un archivo.
+
+    Guarda `text` en `filepath`.
 
     Parameters
     ----------
-    :param text: str
-    :param filepath: str|Path
+    text : str
+        Texto que se quiere guardar.
+    filepath : str or Path
+        Ruta del archivo en el cual se quiere guardar texto.
+
+    Returns
+    -------
+    None
     """
     with open(filepath, "w", newline="\n", encoding="utf-8") as out:
         for line in text.splitlines():
@@ -69,29 +83,42 @@ def save_text(text, filepath):
 
 
 def save_metadata(metadata, filepath):
-    """
-    Almacena `metadata` en `filepath`.
+    """Guarda metadata en un archivo.
+
+    Guarda `metadata` en `filepath`.
 
     Parameters
     ----------
-    :param metadata: dict
-    :param filepath: str|Path
+    metadata : dict
+        Metadata que se quiere guardar.
+    filepath : str or Path
+        Ruta de archivo en el cual se quiere guardar metadata.
+
+    Returns
+    -------
+    None
     """
     with open(filepath, mode="w", encoding="utf-8") as out:
         json.dump(metadata, out, ensure_ascii=False)
 
 
 def extract_all(docspath, textspath, metapath):
-    """
-    Extrae texto y metadata de cada archivo en `docspath`.
+    """Extrae y guarda texto y metadata de archivos en un directorio.
 
-    Almacena texto y metadata en directorios `textspath` y `metapath`.
+    Extrae de cada archivo en `docspath`, y guarda texto y metadata en directorios `textspath` y `metapath` respectivamente.
 
     Parameters
     ----------
-    :param docspath: str
-    :param textspath: str
-    :param metapath: str
+    docspath : str
+        Directorio inicial existente donde están los documentos.
+    textspath : str
+        Nombre de directorio en donde se quiere almacenar texto.
+    metapath: str
+        Nombre de directorio en donde se quiere almacenar metadata.
+
+    Returns
+    -------
+    None
     """
     dirdocs = Path(docspath)
     dirtexts = create_sibling_dir(docspath, textspath)
