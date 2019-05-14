@@ -6,15 +6,15 @@ from pathlib import Path
 def crear_directorio(existente, nombre):
     """Crea nuevo directorio al mismo nivel de uno existente.
 
-    Parámetros
-    ----------
+    Parameters
+    -------------
     existente : str | Path
         Directorio inicial existente.
     nombre : str
         Nombre de nuevo directorio a crear.
 
-    Devuelve
-    --------
+    Returns
+    ---------
     Path
         Nuevo directorio.
     """

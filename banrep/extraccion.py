@@ -9,13 +9,13 @@ from banrep.comunes import crear_directorio
 def extraer_texto(archivo):
     """Extrae texto de archivo.
 
-    Parámetros
-    ----------
+    Parameters
+    -------------
     archivo : str | Path
         Ruta del archivo del cual se quiere extraer texto.
 
-    Devuelve
-    --------
+    Returns
+    ---------
     str
         Texto extraído.
     """
@@ -37,8 +37,8 @@ def extraer_texto(archivo):
 def guardar_texto(texto, archivo, filas=True):
     """Guarda texto en un archivo.
 
-    Parámetros
-    ----------
+    Parameters
+    -------------
     texto : str
         Texto que se quiere guardar.
     archivo : str | Path
@@ -46,8 +46,8 @@ def guardar_texto(texto, archivo, filas=True):
     filas : bool
         Escribe por filas si verdadero.
 
-    Devuelve
-    --------
+    Returns
+    ---------
     None
     """
     with open(archivo, "w", newline="\n", encoding="utf-8") as ruta:
@@ -62,8 +62,8 @@ def guardar_texto(texto, archivo, filas=True):
 def procesar_todos(existente, nombre, filas=True):
     """Extrae y guarda texto de cada archivo al que no se le ha extraído.
 
-    Parámetros
-    ----------
+    Parameters
+    -------------
     existente : str | Path
         Directorio inicial existente donde están los documentos.
     nombre : str
@@ -71,8 +71,8 @@ def procesar_todos(existente, nombre, filas=True):
     filas : bool
         Escribe por filas si verdadero.
 
-    Devuelve
-    --------
+    Returns
+    ---------
     int
         Número de documentos procesados
     """
