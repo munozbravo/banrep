@@ -1,11 +1,14 @@
+from pathlib import Path
 from setuptools import setup, find_packages
 
+
+here = Path().resolve()
 
 with open("README.md", "r", encoding="utf-8") as fh:
     readme = fh.read()
 
 about = {}
-with open("__version__.py", "r", encoding="utf-8") as f:
+with open(here.joinpath("banrep", "__version__.py"), "r", encoding="utf-8") as f:
     exec(f.read(), about)
 
 setup(
