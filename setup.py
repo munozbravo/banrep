@@ -19,9 +19,10 @@ setup(
     author_email=about["__email__"],
     packages=find_packages(exclude=["docs", "tests"]),
     classifiers=[
-        "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: MIT License",
+        "Natural Language :: Spanish",
         "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3.7",
     ],
     python_requires="~=3.7",
     include_package_data=True,
