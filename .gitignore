@@ -14,3 +14,6 @@ models/
 # otros #
 *.csv
 *.html
+
+# mkdocs #
+site/
