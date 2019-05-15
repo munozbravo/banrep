@@ -10,7 +10,7 @@
 
 Visite la [documentación][web_docs] para información detallada de uso.
 
-[web_docs]: https:www.ejemplo.com
+[web_docs]: https://www.ejemplo.com
 
 | Guía                       |                                  |
 |----------------------------|----------------------------------|
