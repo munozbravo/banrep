@@ -57,4 +57,4 @@ Para ayuda sobre las funciones disponibles, desde python puede usar `help`.
 python
 >>> from banrep import extraccion
 >>> help(extraccion)
-````
+```
