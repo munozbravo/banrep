@@ -1,10 +1,28 @@
-# Banrep
+# banrep: Analítica de Texto en el [Banco de la República | Colombia][web_banrep].
 
-Analítica de Texto en el [Banco de la República | Colombia][web_banrep].
+[web_banrep]: http://www.banrep.gov.co/
 
-El código fuente está disponible [en este repositorio][web_repo]
+**banrep** es una librería para analizar conjuntos de documentos textuales.
 
-*En construcción: se irá agregando funcionalidad*
+----
+
+## 📖Cómo usar
+
+Visite la [documentación][web_docs] para información detallada de uso.
+
+[web_docs]: https:www.ejemplo.com
+
+| Guía                       |                                  |
+|----------------------------|----------------------------------|
+| [Introducción][intro]      | Motivación de la librería        |
+| [Instalación][instalacion] | Cómo instalar en su equipo       |
+| [Modo de uso][uso]         | Cómo usar la librería            |
+| [Código][api]              | Detalle de cada módulo y función |
+
+[intro]: https://www.intro.com
+[instalacion]: https://www.intro.com
+[uso]: https://www.intro.com
+[api]: https://www.intro.com
 
 ----
 
@@ -12,7 +30,9 @@ El código fuente está disponible [en este repositorio][web_repo]
 
 Se recomienda instalar en un entorno virtual para no interferir con otras instalaciones de python.
 
-Una opción es descargar [Miniconda3][web_conda], para crear y activar un entorno básico con `conda`.
+Una opción es descargar [Miniconda3][web_conda], para crear y activar un entorno básico con `conda` que instale `pip`.
+
+[web_conda]: https://conda.io/miniconda.html
 
 ```bash
 # crear un entorno...
@@ -25,21 +45,21 @@ Proceed ([y]/n)? y
 conda activate entorno
 ```
 
- El archivo [environment.yml](environment.yml) detalla las diferentes librerías requeridas que se instararán.
-
 ### pip
 
-El entorno debe tener instalado **pip**.
+Una vez activado el entorno, instalar usando `pip`. Esto instalará automáticamente las librerías que **banrep** requiere.
 
 ```bash
 pip install banrep
 ```
 
-## Modelo de Procesamiento de Lenguaje Natural
+### Modelo de Lenguaje Natural
 
 Se requiere un modelo pre-entrenado de [Spacy][spacy_models], que depende del idioma del texto que se quiera procesar.
 
-Existen diversas formas de instalar, la más fácil es usando *download*.
+[spacy_models]: https://spacy.io/models
+
+Existen diversas formas de instalar, la más fácil es usando `download`.
 
 ```bash
 python -m spacy download es_core_news_md
@@ -47,62 +67,14 @@ python -m spacy download es_core_news_md
 
 Cuando se piensa usar el mismo modelo para diferentes proyectos, una alternativa es hacer una [instalación manual][spacy_manual]: descargar el [archivo del modelo][spacy_esmd], guardarlo en el directorio deseado, y crear un [vínculo simbólico][spacy_link] a dicho modelo.
 
+[spacy_manual]: https://spacy.io/usage/models#download-manual
+[spacy_esmd]: https://github.com/explosion/spacy-models/releases/download/es_core_news_md-2.1.0/es_core_news_md-2.1.0.tar.gz
+[spacy_link]: https://spacy.io/usage/models#usage-link
+
 ----
-
-## Modo de uso
-
-### [Extraer texto de documentos][repo_extraccion]
-Asume que el usuario quiere extraer texto de archivos binarios como pdf, word, powerpoint, y que están almacenados en una carpeta en disco.
-
-El uso desde la línea de comandos crea directorio de salida paralelo a directorio original.
-
-```bash
-# En este ejemplo tiene documentos en carpeta ~/Downloads/docs/
-# Resultado será almacenado en ~Downloads/corpus
-
-python -m banrep.extraccion ~/Downloads/docs/ --salida corpus
-```
-
-Si se omite directorio de salida crea uno llamado `textos`.
-
-```bash
-# Resultado será almacenado en ~Downloads/textos
-
-python -m banrep.extraccion ~/Downloads/docs/
-```
-
-Para importar en python y usar las funciones individualmente:
-
-```python
-from banrep.extraccion import extraer_texto, guardar_texto, procesar_todos
-
-texto = extraer_texto('mi-super-archivo.pdf')
-
-guardar_texto(texto, 'mi-super-archivo.txt', filas=True)
-
-n = procesar_todos('algun/directorio/', 'textos', filas=True)
-
-print(f'{n} archivos procesados')
-```
-
-Para ayuda sobre las funciones disponibles, desde python usar `help`
-
-```bash
-python
->>> from banrep import extraccion
->>> help(extraccion)
-````
 
 ### TODO: modelos
 
 ----
 
-[web_banrep]: http://www.banrep.gov.co/
 [web_repo]: https://github.com/munozbravo/banrep
-[web_conda]: https://conda.io/miniconda.html
-[spacy_models]: https://spacy.io/models
-[spacy_manual]: https://spacy.io/usage/models#download-manual
-[spacy_esmd]: https://github.com/explosion/spacy-models/releases/download/es_core_news_md-2.1.0/es_core_news_md-2.1.0.tar.gz
-[spacy_link]: https://spacy.io/usage/models#usage-link
-
-[repo_extraccion]: banrep/extraccion.py
