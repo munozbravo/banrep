@@ -1,4 +1,4 @@
-# banrep: Analítica de Texto en el [Banco de la República | Colombia][web_banrep].
+# banrep: Analítica de Texto en el [Banco de la República][web_banrep].
 
 [web_banrep]: http://www.banrep.gov.co/
 

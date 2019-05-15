@@ -1,7 +1,7 @@
 #
 __title__ = "banrep"
-__version__ = "0.1.1"
-__description__ = "Análisis de texto en Banco de la República"
+__version__ = "0.1.2"
+__description__ = "Analítica de Texto en el Banco de la República"
 __url__ = "https://github.com/munozbravo/banrep"
 __author__ = "Germán Muñoz"
 __email__ = "gamunozbravo@gmail.com"
