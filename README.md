@@ -10,19 +10,17 @@
 
 Visite la [documentación][web_docs] para información detallada de uso.
 
-[web_docs]: https://www.ejemplo.com
+[web_docs]: https://munozbravo.github.io/banrep/
 
 | Guía                       |                                  |
 |----------------------------|----------------------------------|
 | [Introducción][intro]      | Motivación de la librería        |
 | [Instalación][instalacion] | Cómo instalar en su equipo       |
-| [Modo de uso][uso]         | Cómo usar la librería            |
-| [Código][api]              | Detalle de cada módulo y función |
+| [Extracción][extraccion]         | Cómo usar el módulo de extracción       |
 
-[intro]: https://www.intro.com
-[instalacion]: https://www.intro.com
-[uso]: https://www.intro.com
-[api]: https://www.intro.com
+[intro]: https://munozbravo.github.io/banrep/intro/
+[instalacion]: https://munozbravo.github.io/banrep/instalacion/
+[extraccion]: https://munozbravo.github.io/banrep/uso_extraccion/
 
 ----
 
@@ -74,7 +72,3 @@ Cuando se piensa usar el mismo modelo para diferentes proyectos, una alternativa
 ----
 
 ### TODO: modelos
-
-----
-
-[web_repo]: https://github.com/munozbravo/banrep
