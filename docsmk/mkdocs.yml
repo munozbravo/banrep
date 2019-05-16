@@ -1,0 +1,32 @@
+site_name: BanRep
+
+repo_url: https://github.com/munozbravo/banrep
+
+nav:
+    - Guía: 'index.md'
+    - Introducción: 'intro.md'
+    - Instalación: 'instalacion.md'
+    - Modo de Uso:
+        - 'uso_extraccion.md'
+
+markdown_extensions:
+    - admonition
+    - footnotes
+    - codehilite:
+        guess_lang: false
+    - toc:
+        toc_depth: 1
+
+plugins:
+    - search:
+        lang: es
+
+theme:
+    name: 'material'
+    language: 'es'
+    palette:
+        primary: 'indigo'
+        accent: 'indigo'
+    font:
+        text: 'Roboto'
+        code: 'Roboto Mono'
