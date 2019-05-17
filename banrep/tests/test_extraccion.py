@@ -1,41 +1,30 @@
 # coding: utf-8
 """Modulo para pruebas de extraccion."""
-from banrep.extraccion import extraer_texto, guardar_texto, procesar_todos
+from banrep.extraccion import extraer_info, extraer_archivos
 
 import pytest
 
 
-def test_extraccion_extraer_texto_error():
-        with pytest.raises(TypeError):
-                texto = extraer_texto()
+def test_extraer_info():
+    texto, metadata = extraer_info("bla.pdf")
+    assert texto == None
 
 
-def test_extraccion_extraer_texto_inexistente():
-        texto = extraer_texto('bla.pdf')
-        assert texto == None
+def test_extraer_info_arg0():
+    with pytest.raises(TypeError):
+        texto, metadata = extraer_info()
 
 
-def test_extraccion_guardar_texto_filas(tmp_path):
-    text = "Hello"
-    filepath = tmp_path.joinpath("filas.txt")
-
-    guardar_texto(text, filepath, filas=True)
-    assert filepath.read_text(encoding="utf-8") == "Hello\n"
+def test_extraer_archivos_arg0():
+    with pytest.raises(TypeError):
+        n = extraer_archivos()
 
 
-def test_extraccion_guardar_texto_no_filas(tmp_path):
-    text = "Hello"
-    filepath = tmp_path.joinpath("nofilas.txt")
-
-    guardar_texto(text, filepath, filas=False)
-    assert filepath.read_text(encoding="utf-8") == "Hello"
+def test_extraer_archivos_arg1(tmp_path):
+    with pytest.raises(TypeError):
+        n = extraer_archivos(tmp_path)
 
 
-def test_extraccion_procesar_todos_error():
-        with pytest.raises(TypeError):
-                n = procesar_todos()
-
-
-def test_extraccion_procesar_todos_0(tmp_path):
-        n = procesar_todos(tmp_path, "textos")
-        assert n == 0
+def test_extraer_archivos(tmp_path):
+    n = extraer_archivos(tmp_path, "textos")
+    assert n == 0

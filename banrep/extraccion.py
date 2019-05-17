@@ -3,21 +3,23 @@
 from pathlib import Path
 
 from tika import parser
-from banrep.comunes import crear_directorio
+
+from banrep.io import guardar_texto
+from banrep.utils import crear_directorio
 
 
-def extraer_texto(archivo):
-    """Extrae texto de archivo.
+def extraer_info(archivo):
+    """Extrae texto y metadata de archivo.
 
     Parameters
     -------------
     archivo : str | Path
-        Ruta del archivo del cual se quiere extraer texto.
+        Ruta del archivo del cual se quiere extraer texto y metadata.
 
     Returns
     ---------
-    str
-        Texto extraído.
+    tuple (str, dict)
+        Texto y Metadata.
     """
     ruta = Path(archivo)
     if ruta.is_file():
@@ -25,69 +27,44 @@ def extraer_texto(archivo):
             info = parser.from_file(str(ruta))
 
         except Exception:
-            print(f"Archivo {ruta.name} no pudo extraerse.")
+            print(f"No pudo extraerse información de {ruta.name}.")
             info = dict()
     else:
-        print(f"{ruta.name} no es un archivo")
+        print(f"{ruta.name} no es un archivo.")
         info = dict()
 
-    return info.get("content")
+    texto = info.get("content")
+    metadata = info.get("metadata")
+
+    return texto, metadata
 
 
-def guardar_texto(texto, archivo, filas=True):
-    """Guarda texto en un archivo.
-
-    Parameters
-    -------------
-    texto : str
-        Texto que se quiere guardar.
-    archivo : str | Path
-        Ruta del archivo en el cual se quiere guardar texto.
-    filas : bool
-        Escribe por filas si verdadero.
-
-    Returns
-    ---------
-    None
-    """
-    with open(archivo, "w", newline="\n", encoding="utf-8") as ruta:
-        if filas:
-            for fila in texto.splitlines():
-                ruta.write(fila)
-                ruta.write("\n")
-        else:
-            ruta.write(texto)
-
-
-def procesar_todos(existente, nombre, filas=True):
+def extraer_archivos(dir_docs, dir_textos):
     """Extrae y guarda texto de cada archivo al que no se le ha extraído.
 
     Parameters
     -------------
-    existente : str | Path
-        Directorio inicial existente donde están los documentos.
-    nombre : str
-        Nombre de directorio en donde se quiere almacenar texto.
-    filas : bool
-        Escribe por filas si verdadero.
+    dir_docs : str | Path
+        Directorio donde están los documentos originales.
+    dir_textos : str
+        Directorio donde se quiere guardar texto extraído.
 
     Returns
     ---------
     int
         Número de documentos procesados
     """
-    dirdocs = Path(existente)
-    dirtextos = crear_directorio(existente, nombre)
+    dirdocs = Path(dir_docs)
+    dirtextos = crear_directorio(nombre=dir_textos)
 
     n = 0
     for ruta in dirdocs.iterdir():
         if ruta.is_file():
             archivo = dirtextos.joinpath(f"{ruta.stem}.txt")
             if not archivo.exists():
-                texto = extraer_texto(ruta)
+                texto, metadata = extraer_info(ruta)
                 if texto:
-                    guardar_texto(texto, archivo, filas=filas)
-
+                    guardar_texto(texto, archivo)
                     n += 1
 
     return n
@@ -97,22 +74,25 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="""Extrae texto de cada documento ubicado en dirdocs y, si no existe ya, lo almacena en salida"""
+        description="""Extrae y guarda texto de cada archivo en entrada."""
     )
 
-    parser.add_argument("dirdocs", help="Directorio en el que están los documentos")
+    parser.add_argument(
+        "entrada", help="Directorio en el que están los archivos originales."
+    )
     parser.add_argument(
         "--salida",
         default="textos",
-        help="Nombre de directorio para guardar lo extraído (si no se especifica: %(default)s)",
+        help="Directorio para guardar texto extraído (si no se especifica: %(default)s)",
     )
     args = parser.parse_args()
 
-    dirdocs = args.dirdocs
+    entrada = args.entrada
     salida = args.salida
 
-    n = procesar_todos(dirdocs, salida, filas=True)
-    print(f"{n} nuevos archivos de la carpeta {Path(dirdocs).name} procesados")
+    n = extraer_archivos(entrada, salida)
+    full = Path(salida).resolve()
+    print(f"{n} nuevos archivos guardados en directorio {str(full)}")
 
 
 if __name__ == "__main__":
