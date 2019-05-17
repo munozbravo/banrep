@@ -17,3 +17,6 @@ models/
 
 # mkdocs #
 site/
+
+# Directorios para output en pruebas #
+outdir/
