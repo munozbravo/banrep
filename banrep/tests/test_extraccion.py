@@ -1,6 +1,6 @@
 # coding: utf-8
 """Modulo para pruebas de extraccion."""
-from banrep.extraccion import extraer_info, extraer_archivos
+from banrep.extraccion import extraer_info, extraer_archivos, main
 
 import pytest
 
@@ -28,3 +28,8 @@ def test_extraer_archivos_arg1(tmp_path):
 def test_extraer_archivos(tmp_path):
     n = extraer_archivos(tmp_path, "textos")
     assert n == 0
+
+
+def test_main_noargs():
+        with pytest.raises(SystemExit):
+                main()

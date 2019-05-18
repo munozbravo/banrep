@@ -5,7 +5,7 @@ from pathlib import Path
 from tika import parser
 
 from banrep.io import guardar_texto
-from banrep.utils import crear_directorio
+from banrep.utils import crear_directorio, iterar_rutas
 
 
 def extraer_info(archivo):
@@ -39,33 +39,32 @@ def extraer_info(archivo):
     return texto, metadata
 
 
-def extraer_archivos(dir_docs, dir_textos):
-    """Extrae y guarda texto de cada archivo al que no se le ha extraído.
+def extraer_archivos(dir_docs, dir_textos, aleatorio=False):
+    """Extrae y guarda texto de cada archivo en directorio si no existe.
 
     Parameters
     -------------
     dir_docs : str | Path
         Directorio donde están los documentos originales.
-    dir_textos : str
+    dir_textos : str | Path
         Directorio donde se quiere guardar texto extraído.
 
     Returns
     ---------
     int
-        Número de documentos procesados
+        Número de documentos procesados.
     """
     dirdocs = Path(dir_docs)
     dirtextos = crear_directorio(nombre=dir_textos)
 
     n = 0
-    for ruta in dirdocs.iterdir():
-        if ruta.is_file():
-            archivo = dirtextos.joinpath(f"{ruta.stem}.txt")
-            if not archivo.exists():
-                texto, metadata = extraer_info(ruta)
-                if texto:
-                    guardar_texto(texto, archivo)
-                    n += 1
+    for ruta in iterar_rutas(dirdocs, aleatorio=aleatorio):
+        archivo = dirtextos.joinpath(f"{ruta.stem}.txt")
+        if not archivo.exists():
+            texto, metadata = extraer_info(ruta)
+            if texto:
+                guardar_texto(texto, archivo)
+                n += 1
 
     return n
 
