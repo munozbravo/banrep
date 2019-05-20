@@ -19,4 +19,4 @@ models/
 site/
 
 # Directorios para output en pruebas #
-outdir/
+pruebas/
