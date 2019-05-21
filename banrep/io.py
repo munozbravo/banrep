@@ -2,6 +2,9 @@
 """Módulo para funciones de lectura y escritura."""
 from pathlib import Path
 
+import pandas as pd
+
+from banrep.preprocesos import filtrar_cortas
 from banrep.utils import iterar_rutas
 
 
@@ -18,7 +21,7 @@ def leer_texto(archivo):
     str
        Texto de archivo.
     """
-    ruta = Path(archivo)
+    ruta = Path(archivo).resolve()
 
     if ruta.is_file():
         try:
@@ -34,25 +37,6 @@ def leer_texto(archivo):
         texto = ""
 
     return texto
-
-
-def iterar_textos(directorio, aleatorio=False):
-    """Itera sobre cada ruta en directorio y extrae el texto.
-
-    Parameters
-    ----------
-    directorio: str | Path
-        Directorio a iterar.
-    aleatorio : bool
-        Iterar aleatoriamente.
-
-    Yields
-    ------
-    str
-        Texto de archivo en ruta.
-    """
-    for archivo in iterar_rutas(directorio, aleatorio=aleatorio):
-        yield leer_texto(archivo)
 
 
 def guardar_texto(texto, archivo):
@@ -73,3 +57,64 @@ def guardar_texto(texto, archivo):
         for fila in texto.splitlines():
             ruta.write(fila)
             ruta.write("\n")
+
+
+def leer_stopwords(archivo, hoja, col="word"):
+    """De un archivo excel lee una columna con palabras.
+
+    Columna `col` de la hoja `hoja` de archivo Excel.
+
+    Parameters
+    ----------
+    archivo : str | Path
+    hoja : str
+    col : str
+
+    Returns
+    -------
+    set
+       Items únicos en la columna
+    """
+    df = pd.read_excel(archivo, sheet_name=hoja)
+
+    return set(df[col])
+
+
+def iterar_registros(directorio, aleatorio=False, chars=0, parrafos=False):
+    """Itera rutas en directorio y extrae detalles de cada documento.
+
+    Documento puede ser el texto de un archivo o cada párrafo en él.
+
+    Parameters
+    ----------
+    directorio : str | Path
+        Directorio a iterar.
+    aleatorio : bool
+        Iterar aleatoriamente.
+    chars : int
+        Mínimo número de caracteres en una línea de texto.
+    parrafos : bool
+        Considerar cada párrafo como documento.
+
+    Yields
+    ------
+    dict
+        Información de cada documento (archivo, fuente, texto).
+    """
+    for archivo in iterar_rutas(directorio, aleatorio=aleatorio):
+        comun = {'archivo': archivo.name, 'fuente': archivo.parent.name}
+        texto = leer_texto(archivo)
+
+        if chars:
+            texto = filtrar_cortas(texto, chars=chars)
+
+        if parrafos:
+            i = 1
+            for p in texto.splitlines():
+                if p:
+                    info = {'parrafo': i, **comun}
+                    i += 1
+                    yield p, info
+        else:
+            info = {'parrafo': 'no', **comun}
+            yield texto, info
