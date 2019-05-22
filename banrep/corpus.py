@@ -2,6 +2,7 @@
 """Módulo para crear corpus de documentos."""
 from pathlib import Path
 
+from gensim.corpora import Dictionary
 from gensim.models import Phrases
 from gensim.models.phrases import Phraser
 from spacy.tokens import Doc, Span, Token
@@ -10,23 +11,20 @@ from banrep.documentos import token_cumple, filtrar_frases
 
 
 class MiCorpus:
-    """Colección de documentos.
-    """
+    """Colección de documentos."""
 
     def __init__(
-        self, lang, registros=None, filtros=None, ngrams=None, long=0
+        self, lang, registros=None, filtros=None, ngrams=None, id2word=None, long=0
     ):
         self.lang = lang
         self.filtros = filtros
         self.ngrams = ngrams
+        self.id2word = id2word
         self.long = long
 
         self.docs = []
-        self.palabras = []
 
         self.n_docs = 0
-        self.n_frases = 0
-        self.n_palabras = 0
 
         self.fijar_extensiones()
         self.lang.add_pipe(self.cumple, last=True)
@@ -37,13 +35,18 @@ class MiCorpus:
             if not self.ngrams:
                 self.ngrams = self.model_ngrams()
 
-            self.docs_a_palabras()
+            if not self.id2word:
+                self.id2word = self.crear_id2word()
 
     def __repr__(self):
-        return f"Corpus con {self.n_docs} docs y {self.n_palabras} palabras."
+        return f"Corpus con {self.n_docs} docs y {len(self.id2word)} palabras únicas."
 
     def __len__(self):
         return self.n_docs
+
+    def __iter__(self):
+        for palabras in self.obtener_palabras():
+            yield self.id2word.doc2bow(palabras)
 
     def fijar_extensiones(self):
         """Fijar extensiones globalmente."""
@@ -118,5 +121,13 @@ class MiCorpus:
 
     def docs_a_palabras(self):
         for palabras in self.obtener_palabras():
-            self.palabras.append(palabras)
+            yield palabras
+
+    def crear_id2word(self):
+        nb = int(0.05 * self.__len__())
+        id2word = Dictionary(palabras for palabras in self.obtener_palabras())
+        id2word.filter_extremes(no_below=nb, no_above=0.50)
+        id2word.compactify()
+
+        return id2word
 
