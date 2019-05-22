@@ -1,7 +1,7 @@
 # coding: utf-8
 """Modulo para pruebas de io."""
 
-from banrep.io import guardar_texto, leer_texto, iterar_textos
+from banrep.io import leer_texto, guardar_texto, iterar_registros
 
 import pytest
 
@@ -35,20 +35,20 @@ def test_iterar_textos(tmp_path):
         archivo = tmp_path.joinpath("filas.txt")
         guardar_texto(texto, archivo)
 
-        iterable = iterar_textos(tmp_path)
+        iterable = iterar_registros(tmp_path)
         assert len(list(iterable)) == 1
 
 
-def test_iterar_textos_aleatorios(tmp_path):
+def test_iterar_registros_aleatorios(tmp_path):
         for i in range(10):
                 texto = f"Hello{i}"
                 archivo = tmp_path.joinpath(f"filas{i}.txt")
                 guardar_texto(texto, archivo)
 
-        aleatorios = iterar_textos(tmp_path, aleatorio=True)
+        aleatorios = iterar_registros(tmp_path, aleatorio=True)
 
-        assert list(aleatorios) != list(iterar_textos(tmp_path))
+        assert list(aleatorios) != list(iterar_registros(tmp_path))
 
-def test_iterar_textos_arg0():
+def test_iterar_registros_arg0():
         with pytest.raises(TypeError):
-                iterable = iterar_textos()
+                iterable = iterar_registros()

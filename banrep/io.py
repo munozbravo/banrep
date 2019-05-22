@@ -59,27 +59,6 @@ def guardar_texto(texto, archivo):
             ruta.write("\n")
 
 
-def leer_stopwords(archivo, hoja, col="word"):
-    """De un archivo excel lee una columna con palabras.
-
-    Columna `col` de la hoja `hoja` de archivo Excel.
-
-    Parameters
-    ----------
-    archivo : str | Path
-    hoja : str
-    col : str
-
-    Returns
-    -------
-    set
-       Items únicos en la columna
-    """
-    df = pd.read_excel(archivo, sheet_name=hoja)
-
-    return set(df[col])
-
-
 def iterar_registros(directorio, aleatorio=False, chars=0, parrafos=False):
     """Itera rutas en directorio y extrae detalles de cada documento.
 
@@ -118,6 +97,27 @@ def iterar_registros(directorio, aleatorio=False, chars=0, parrafos=False):
         else:
             info = {'parrafo': 'no', **comun}
             yield texto, info
+
+
+def leer_stopwords(archivo, hoja, col="word"):
+    """De un archivo excel lee una columna con palabras.
+
+    Columna `col` de la hoja `hoja` de archivo Excel.
+
+    Parameters
+    ----------
+    archivo : str | Path
+    hoja : str
+    col : str
+
+    Returns
+    -------
+    set
+       Items únicos en la columna
+    """
+    df = pd.read_excel(archivo, sheet_name=hoja)
+
+    return set(df[col])
 
 
 def df_crear_textos(df, col_id, col_texto, directorio):
