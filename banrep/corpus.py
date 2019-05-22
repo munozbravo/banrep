@@ -2,61 +2,62 @@
 """Módulo para crear corpus de documentos."""
 from pathlib import Path
 
-import spacy
+from gensim.models import Phrases
+from gensim.models.phrases import Phraser
+from spacy.tokens import Doc, Span, Token
 
-from banrep.documentos import filtrar_frases, filtrar_tokens
-
-
-def doc_metadata(doc, info):
-    """Agrega metadata a un doc.
-
-    Parameters
-    ----------
-    doc : spacy.tokens.Doc
-        Objeto al cual se quiere agregar metadata.
-    info : dict
-        Metadata a agregar.
-    """
-    doc.user_data["metadata"] = info
-
-
-def fijar_metadata():
-    """Fijar extension metadata a Docs y Spans."""
-    if not spacy.tokens.Doc.has_extension("metadata"):
-        spacy.tokens.Doc.set_extension(
-            "metadata", getter=lambda doc: doc.user_data.get("metadata", {})
-        )
-
-    if not spacy.tokens.Span.has_extension("metadata"):
-        spacy.tokens.Span.set_extension(
-            "metadata", getter=lambda doc: doc._.get("metadata", {})
-        )
+from banrep.documentos import token_cumple, filtrar_frases
 
 
 class MiCorpus:
     """Colección de documentos.
     """
 
-    def __init__(self, lang, registros=None, minlen=0, filtros=None):
+    def __init__(
+        self, lang, registros=None, filtros=None, ngrams=None, long=0
+    ):
         self.lang = lang
-        self.minlen = minlen
         self.filtros = filtros
+        self.ngrams = ngrams
+        self.long = long
+
         self.docs = []
-        self.frases = []
+        self.palabras = []
+
         self.n_docs = 0
         self.n_frases = 0
         self.n_palabras = 0
+
+        self.fijar_extensiones()
+        self.lang.add_pipe(self.cumple, last=True)
+
         if registros:
             self.agregar_docs(registros)
-            self.agregar_frases()
+
+            if not self.ngrams:
+                self.ngrams = self.model_ngrams()
+
+            self.docs_a_palabras()
 
     def __repr__(self):
-        return f"Corpus con {self.n_docs} documentos y {self.n_palabras} palabras."
+        return f"Corpus con {self.n_docs} docs y {self.n_palabras} palabras."
 
     def __len__(self):
         return self.n_docs
 
-    def agregar_docs(self, datos, cuantos=1000):
+    def fijar_extensiones(self):
+        """Fijar extensiones globalmente."""
+        if not Token.has_extension("cumple"):
+            Token.set_extension("cumple", default=True)
+
+    def cumple(self, doc):
+        for token in doc:
+            if not token_cumple(token, filtros=self.filtros):
+                token._.set("cumple", False)
+
+        return doc
+
+    def agregar_docs(self, datos):
         """Agrega un flujo de documentos con texto y metadata.
 
         Parameters
@@ -66,24 +67,56 @@ class MiCorpus:
         cuantos : int
             Número de documentos a procesar en batch.
         """
-        for doc, metadata in self.lang.pipe(datos, as_tuples=True, batch_size=cuantos):
-            doc._.metadata = metadata
+        for doc, meta in self.lang.pipe(datos, as_tuples=True):
             self.docs.append(doc)
             self.n_docs += 1
 
-    def agregar_frases(self):
+    def desagregar(self):
+        documentos = []
         for doc in self.docs:
-            doc_frases = []
-            nf = 1
-            for frase in filtrar_frases(doc, n_tokens=self.minlen):
-                meta = dict(n=nf, chars=frase.end_char - frase.start_char)
-                frase._.metadata = meta
-                self.n_frases += 1
-                nf += 1
-                tokens = filtrar_tokens(frase, filtros=self.filtros)
-                palabras = [tok.lower_ for tok in tokens]
-                doc_frases.append(palabras)
-                self.n_palabras += len(palabras)
+            frases = []
+            for frase in filtrar_frases(doc, n_tokens=self.long):
+                tokens = (tok for tok in frase if tok._.get("cumple"))
+                frases.append(tokens)
 
-            self.frases.append(doc_frases)
+            documentos.append(frases)
+
+        return documentos
+
+    def iterar_frases(self):
+        for doc_ in self.desagregar():
+            for tokens in doc_:
+                yield (tok.lower_ for tok in tokens)
+
+    def model_ngrams(self):
+        """Crea modelos de ngramas a partir de frases.
+
+        Returns
+        -------
+        dict
+            Modelos Phraser para bigramas y trigramas
+        """
+        mc = 20
+        big = Phrases(self.iterar_frases(), min_count=mc)
+        bigrams = Phraser(big)
+
+        trig = Phrases(bigrams[self.iterar_frases()], min_count=mc)
+        trigrams = Phraser(trig)
+
+        return dict(bigrams=bigrams, trigrams=trigrams)
+
+    def obtener_palabras(self):
+        bigrams = self.ngrams.get("bigrams")
+        trigrams = self.ngrams.get("trigrams")
+
+        for doc_ in self.desagregar():
+            palabras = []
+            for tokens in doc_:
+                palabras.extend(trigrams[bigrams[(t.lower_ for t in tokens)]])
+
+            yield palabras
+
+    def docs_a_palabras(self):
+        for palabras in self.obtener_palabras():
+            self.palabras.append(palabras)
 
