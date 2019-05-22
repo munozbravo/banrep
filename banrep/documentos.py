@@ -2,6 +2,34 @@
 """Módulo para funciones de procesamiento de documentos."""
 
 
+def token_cumple(token, filtros=None):
+    """Determina si token pasa los filtros.
+
+    Parameters
+    ----------
+    token : spacy.tokens.Token
+        Token a evaluar.
+    filtros : dict, optional
+        (stopwords, postags, entities)
+
+    Returns
+    -------
+    bool
+        Si token pasa los filtros o no.
+    """
+    cumple = (
+        (token.is_alpha)
+        and (not token.like_url)
+        and (not token.like_num)
+        and (not token.like_email)
+        and (token.lower_ not in filtros.get("stopwords"))
+        and (token.pos_ not in filtros.get("postags"))
+        and (token.ent_type_ not in filtros.get("entities"))
+    )
+
+    return cumple
+
+
 def filtrar_tokens(contenedor, filtros=None):
     """Filtra tokens del contenedor según filtros.
 
@@ -17,22 +45,7 @@ def filtrar_tokens(contenedor, filtros=None):
     list (spacy.tokens.Token)
         Los tokens no descartados por los filtros.
     """
-    tokens = (tok for tok in contenedor)
-
-    if filtros:
-
-        if filtros.get("alpha"):
-            tokens = (tok for tok in tokens if tok.is_alpha)
-        if filtros.get("stopwords"):
-            tokens = (tok for tok in tokens if tok.lower_ not in filtros.get("stopwords"))
-        if filtros.get("postags"):
-            tokens = (tok for tok in tokens if tok.pos_ not in filtros.get("postags"))
-        if filtros.get("entities"):
-            tokens = (
-                tok for tok in tokens if tok.ent_type_ not in filtros.get("entities")
-            )
-
-    return tokens
+    return (tok for tok in contenedor if token_cumple(tok, filtros=filtros))
 
 
 def filtrar_frases(doc, n_tokens=0):
