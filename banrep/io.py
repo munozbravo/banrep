@@ -118,3 +118,28 @@ def iterar_registros(directorio, aleatorio=False, chars=0, parrafos=False):
         else:
             info = {'parrafo': 'no', **comun}
             yield texto, info
+
+
+def df_crear_textos(df, col_id, col_texto, directorio):
+    """Crea archivo de texto en directorio para cada record de dataframe.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        En alguna de sus columnas tiene texto en cada fila.
+    col_id : str
+        Nombre de columna con valores únicos para usar en nombre archivo.
+    col_texto: str
+        Nombre de columna que contiene texto en sus filas.
+    directorio: str | Path
+        Directorio en donde se quiere guardar los archivos de texto.
+
+    Returns
+    ---------
+    None
+    """
+    salida = Path(directorio).resolve()
+    df['nombres'] = df[col_id].apply(lambda x: salida.joinpath(f"{x}.txt"))
+    df.apply(lambda x: guardar_texto(x[col_texto], x['nombres']), axis=1)
+
+    return
