@@ -98,8 +98,8 @@ def iterar_registros(directorio, aleatorio=False, chars=0, parrafos=False):
 
     Yields
     ------
-    dict
-        Información de cada documento (archivo, fuente, texto).
+    tuple (str, dict)
+        Información de cada documento (texto, (archivo, fuente)).
     """
     for archivo in iterar_rutas(directorio, aleatorio=aleatorio):
         comun = {'archivo': archivo.name, 'fuente': archivo.parent.name}
