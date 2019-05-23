@@ -124,9 +124,8 @@ class MiCorpus:
             yield palabras
 
     def crear_id2word(self):
-        nb = int(0.05 * self.__len__())
         id2word = Dictionary(palabras for palabras in self.obtener_palabras())
-        id2word.filter_extremes(no_below=nb, no_above=0.50)
+        id2word.filter_extremes(no_below=5, no_above=0.50)
         id2word.compactify()
 
         return id2word
