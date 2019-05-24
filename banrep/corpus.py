@@ -24,8 +24,6 @@ class MiCorpus:
 
         self.docs = []
 
-        self.n_docs = 0
-
         self.fijar_extensiones()
         self.lang.add_pipe(self.cumple, last=True)
 
@@ -39,12 +37,15 @@ class MiCorpus:
                 self.id2word = self.crear_id2word()
 
     def __repr__(self):
-        return f"Corpus con {self.n_docs} docs y {len(self.id2word)} palabras únicas."
+        return (
+            f"Corpus con {len(self.docs)} docs y {len(self.id2word)} palabras únicas."
+        )
 
     def __len__(self):
-        return self.n_docs
+        return len(self.docs)
 
     def __iter__(self):
+        """Iterar devuelve las palabras de cada documento como BOW."""
         for palabras in self.obtener_palabras():
             yield self.id2word.doc2bow(palabras)
 
@@ -53,7 +54,22 @@ class MiCorpus:
         if not Token.has_extension("cumple"):
             Token.set_extension("cumple", default=True)
 
+        exts = ["archivo", "fuente", "parrafo", "frases", "palabras"]
+        for ext in exts:
+            if not Doc.has_extension(ext):
+                Doc.set_extension(ext, default=None)
+
     def cumple(self, doc):
+        """Cambia el valor de la extension cumple (Token) si falla filtros.
+
+        Parameters
+        ----------
+        doc : spacy.tokens.Doc
+
+        Returns
+        -------
+        doc : spacy.tokens.Doc
+        """
         for token in doc:
             if not token_cumple(token, filtros=self.filtros):
                 token._.set("cumple", False)
@@ -66,30 +82,49 @@ class MiCorpus:
         Parameters
         ----------
         datos : Iterable[Tuple(str, dict)]
-            Directorio a iterar.
-        cuantos : int
-            Número de documentos a procesar en batch.
+            Texto y Metadata de cada documento.
         """
         for doc, meta in self.lang.pipe(datos, as_tuples=True):
             self.docs.append(doc)
-            self.n_docs += 1
+
+            doc._.archivo = meta["archivo"]
+            doc._.fuente = meta["fuente"]
+            doc._.parrafo = meta["parrafo"]
 
     def desagregar(self):
-        documentos = []
+        """Desagrega un documento en frases compuestas por palabras.
+
+        Yields
+        ------
+        Iterable[list[list(spacy.tokens.Token)]]
+            Palabras de cada frase en un documento.
+        """
         for doc in self.docs:
             frases = []
             for frase in filtrar_frases(doc, n_tokens=self.long):
-                tokens = (tok for tok in frase if tok._.get("cumple"))
+                tokens = [tok for tok in frase if tok._.get("cumple")]
                 frases.append(tokens)
 
-            documentos.append(frases)
+            if not doc._.palabras:
+                palabras = [t for tokens in frases for t in tokens]
+                doc._.palabras = len(palabras)
 
-        return documentos
+            if not doc._.frases:
+                doc._.frases = len(frases)
+
+            yield frases
 
     def iterar_frases(self):
+        """Itera todas las frases del corpus.
+
+        Yields
+        ------
+        Iterable[list(str)]
+            Palabras de una frase.
+        """
         for doc_ in self.desagregar():
-            for tokens in doc_:
-                yield (tok.lower_ for tok in tokens)
+            for frase in doc_:
+                yield (tok.lower_ for tok in frase)
 
     def model_ngrams(self):
         """Crea modelos de ngramas a partir de frases.
@@ -109,6 +144,13 @@ class MiCorpus:
         return dict(bigrams=bigrams, trigrams=trigrams)
 
     def obtener_palabras(self):
+        """Palabras de un documento, ya procesadas para identificar ngramas.
+
+        Yields
+        ------
+        Iterable[list(str)]
+            Palabras de un documento.
+        """
         bigrams = self.ngrams.get("bigrams")
         trigrams = self.ngrams.get("trigrams")
 
@@ -124,6 +166,13 @@ class MiCorpus:
             yield palabras
 
     def crear_id2word(self):
+        """Crea diccionario de todas las palabras procesadas del corpus.
+
+        Returns
+        -------
+        gensim.corpora.dictionary.Dictionary
+            Diccionario de todas las palabras procesas y filtradas.
+        """
         id2word = Dictionary(palabras for palabras in self.obtener_palabras())
         id2word.filter_extremes(no_below=5, no_above=0.50)
         id2word.compactify()
