@@ -99,25 +99,27 @@ def iterar_registros(directorio, aleatorio=False, chars=0, parrafos=False):
             yield texto, info
 
 
-def leer_stopwords(archivo, hoja, col="word"):
-    """De un archivo excel lee una columna con palabras.
+def leer_palabras(archivo, hoja, col_grupo="type", col_set="word"):
+    """Extrae grupos de palabras de un archivo Excel.
 
-    Columna `col` de la hoja `hoja` de archivo Excel.
+    Agrupa `col_set` por columna `col_grupo` de hoja `hoja` de archivo Excel.
 
     Parameters
     ----------
     archivo : str | Path
     hoja : str
-    col : str
+    col_grupo : str
+    col_set : str
 
     Returns
     -------
-    set
-       Items únicos en la columna
+    dict (str:set)
+       Grupos de palabras en cada grupo.
     """
     df = pd.read_excel(archivo, sheet_name=hoja)
+    grupos = {k: set(v) for k, v in df.groupby(col_grupo)[col_set]}
 
-    return set(df[col])
+    return grupos
 
 
 def df_crear_textos(df, col_id, col_texto, directorio):
