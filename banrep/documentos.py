@@ -62,3 +62,21 @@ def filtrar_frases(doc, n_tokens=0):
         Frase no descartada por el filtro.
     """
     yield from (frase for frase in doc.sents if len(frase) > n_tokens)
+
+
+def token_presente(token, wordlist):
+    """Determina si token está en un grupo de palabras.
+
+    Parameters
+    ----------
+    token : spacy.tokens.Token
+        Token a evaluar.
+    wordlist : set
+        Grupo de palabras.
+
+    Returns
+    -------
+    bool
+        Si token está en el grupo de palabras o no.
+    """
+    return token.lower_ in wordlist
