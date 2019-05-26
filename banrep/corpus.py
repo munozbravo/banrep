@@ -7,25 +7,29 @@ from gensim.models import Phrases
 from gensim.models.phrases import Phraser
 from spacy.tokens import Doc, Span, Token
 
-from banrep.documentos import token_cumple, filtrar_frases
+from banrep.documentos import token_cumple, filtrar_frases, token_presente
 
 
 class MiCorpus:
     """Colección de documentos."""
 
     def __init__(
-        self, lang, registros=None, filtros=None, ngrams=None, id2word=None, long=0
+        self, lang, registros=None, filtros=None, ngrams=None, id2word=None, long=0, wordlists=None
     ):
         self.lang = lang
         self.filtros = filtros
         self.ngrams = ngrams
         self.id2word = id2word
         self.long = long
+        self.wordlists = wordlists
 
         self.docs = []
 
         self.fijar_extensiones()
-        self.lang.add_pipe(self.cumple, last=True)
+
+        self.lang.add_pipe(self.tokens_incumplen, last=True)
+        if self.wordlists:
+            self.lang.add_pipe(self.tokens_presentes, last=True)
 
         if registros:
             self.agregar_docs(registros)
@@ -59,7 +63,12 @@ class MiCorpus:
             if not Doc.has_extension(ext):
                 Doc.set_extension(ext, default=None)
 
-    def cumple(self, doc):
+        if self.wordlists:
+            for tipo in self.wordlists:
+                if not Token.has_extension(tipo):
+                    Token.set_extension(tipo, default=False)
+
+    def tokens_incumplen(self, doc):
         """Cambia el valor de la extension cumple (Token) si falla filtros.
 
         Parameters
@@ -73,6 +82,26 @@ class MiCorpus:
         for token in doc:
             if not token_cumple(token, filtros=self.filtros):
                 token._.set("cumple", False)
+
+        return doc
+
+    def tokens_presentes(self, doc):
+        """Cambia valor de extensiones creadas (Token) en caso de wordlists.
+
+        Parameters
+        ----------
+        doc : spacy.tokens.Doc
+
+        Returns
+        -------
+        doc : spacy.tokens.Doc
+        """
+        if self.wordlists:
+            for tipo in self.wordlists:
+                wordlist = wordlists.get(tipo)
+                for token in doc:
+                    if token_presente(token, wordlist):
+                        token._.set(tipo, True)
 
         return doc
 
