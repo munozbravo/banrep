@@ -5,7 +5,9 @@
 *.id2word
 *.state
 *.npy
-models/
+bigrams
+trigrams
+id2word
 
 # vscode stuff #
 ########
