@@ -326,6 +326,18 @@
   </li>
 
     
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../vinculos/" title="Vínculos de interés" class="md-nav__link">
+      Vínculos de interés
+    </a>
+  </li>
+
+    
   </ul>
 </nav>
                   </div>
@@ -361,7 +373,7 @@
 <h2>Extraer texto de documentos</h2>
 <p>Una necesidad común para analizar texto es poder extraerlo de archivos pdf, word, powerpoint o similares, que usualmente están almacenados en una carpeta en disco.</p>
 <h3>Línea de comandos</h3>
-<p>Con su <a href="../instalacion/">entorno virtual activado</a>, desde la línea de comandos puede extraer el texto de cada archivo que tenga guardado en una carpeta, y almacenarlo en un nuevo archivo que será guardado en una nueva carpeta.</p>
+<p>Con su <a href="../instalacion/">entorno virtual activado</a>, desde la línea de comandos puede extraer el texto de cada archivo que tenga guardado en una carpeta, y almacenarlo en un nuevo archivo <em>.txt</em> que será guardado en una nueva carpeta.</p>
 <div class="codehilite"><pre><span></span><span class="c1"># En este ejemplo tiene documentos en carpeta ~/Downloads/docs/</span>
 <span class="c1"># Resultado será almacenado en ~Downloads/corpus</span>
 
@@ -379,18 +391,19 @@ python -m banrep.extraccion ~/Downloads/docs/
 
 <h3>Librería</h3>
 <p>Para importar en python y usar las funciones individualmente:</p>
-<div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">banrep.extraccion</span> <span class="kn">import</span> <span class="n">extraer_texto</span><span class="p">,</span> <span class="n">guardar_texto</span><span class="p">,</span> <span class="n">procesar_todos</span>
+<div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">banrep.io</span> <span class="kn">import</span> <span class="n">guardar_texto</span>
+<span class="kn">from</span> <span class="nn">banrep.extraccion</span> <span class="kn">import</span> <span class="n">extraer_info</span><span class="p">,</span> <span class="n">extraer_archivos</span>
 
 <span class="c1"># Extrae el texto de pdf y lo asigna a una variable.</span>
-<span class="n">texto</span> <span class="o">=</span> <span class="n">extraer_texto</span><span class="p">(</span><span class="s1">&#39;mi-super-archivo.pdf&#39;</span><span class="p">)</span>
+<span class="n">texto</span> <span class="o">=</span> <span class="n">extraer_info</span><span class="p">(</span><span class="s1">&#39;mi-super-archivo.pdf&#39;</span><span class="p">)</span>
 
 <span class="c1"># Guarda el texto extraído.</span>
-<span class="n">guardar_texto</span><span class="p">(</span><span class="n">texto</span><span class="p">,</span> <span class="s1">&#39;mi-super-archivo.txt&#39;</span><span class="p">,</span> <span class="n">filas</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">guardar_texto</span><span class="p">(</span><span class="n">texto</span><span class="p">,</span> <span class="s1">&#39;mi-super-archivo.txt&#39;</span><span class="p">)</span>
 
 <span class="c1"># Extrae texto de archivos en un directorio</span>
 <span class="c1"># y almacena nuevos archivos en carpeta textos.</span>
 <span class="c1"># Devuelve el número de archivos procesados.</span>
-<span class="n">n</span> <span class="o">=</span> <span class="n">procesar_todos</span><span class="p">(</span><span class="s1">&#39;algun/directorio/&#39;</span><span class="p">,</span> <span class="s1">&#39;textos&#39;</span><span class="p">,</span> <span class="n">filas</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">n</span> <span class="o">=</span> <span class="n">extraer_archivos</span><span class="p">(</span><span class="s1">&#39;algun/directorio/&#39;</span><span class="p">,</span> <span class="s1">&#39;textos&#39;</span><span class="p">)</span>
 
 <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;{n} archivos procesados&#39;</span><span class="p">)</span>
 </pre></div>
