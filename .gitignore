@@ -15,7 +15,6 @@ id2word
 
 # otros #
 *.csv
-*.html
 
 # mkdocs #
 site/
