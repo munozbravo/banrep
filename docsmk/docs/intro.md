@@ -6,7 +6,7 @@ Cada vez que se ha analizado un nuevo conjunto de documentos se ha generado cód
 
 Cuando recurrentemente se utiliza la misma serie de pasos para el análisis, y cuando más de una persona tiene interés en replicar esa serie de pasos para analizar un conjunto de documentos, resulta adecuado empaquetarlos en una librería que cualquiera pueda reusar.
 
-La librería **banrep** recoge las funciones usadas recurrentemente para el análisis de un conjunto de documentos textuales.
+La librería [banrep][pypi_banrep] recoge las funciones usadas recurrentemente para el análisis de un conjunto de documentos textuales.
 
 [web_banrep]: http://www.banrep.gov.co/
-
+[pypi_banrep]: https://pypi.org/project/banrep/

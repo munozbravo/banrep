@@ -2,8 +2,9 @@
 
 [web_banrep]: http://www.banrep.gov.co/
 
-**banrep** es una librería para analizar conjuntos de documentos textuales.
+[banrep][pypi_banrep] es una librería para analizar conjuntos de documentos textuales.
 
+[pypi_banrep]: https://pypi.org/project/banrep/
 ----
 
 ## 📖Cómo usar

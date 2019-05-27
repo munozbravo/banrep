@@ -1,7 +1,8 @@
 # Extracción
 
-Para usar **banrep** se recomienda hacerlo dentro de un entorno virtual. Puede ver la sección de [instalación][install] para instrucciones sobre cómo crearlo y activarlo.
+Para usar [banrep][pypi_banrep] se recomienda hacerlo dentro de un entorno virtual. Puede ver la sección de [instalación][install] para instrucciones sobre cómo crearlo y activarlo.
 
+[pypi_banrep]: https://pypi.org/project/banrep/
 [install]: instalacion.md
 
 ## Extraer texto de documentos
