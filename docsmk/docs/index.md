@@ -14,9 +14,10 @@ A su izquierda encuenta la navegación a los diferentes temas de esta documentac
 |----------------------------|----------------------------------|
 | [Introducción][intro]      | Motivación de la librería        |
 | [Instalación][instalacion] | Cómo instalar en su equipo       |
-| [Extracción][extraccion]    | Cómo usar el módulo de extracción            |
+| [Extracción][extraccion]    | Cómo usar para extracción de documentos     |
+| [Tópicos][topicos]  | Cómo usar para Análisis de Tópicos       |
 
 [intro]: intro.md
 [instalacion]: instalacion.md
 [extraccion]: uso_extraccion.md
-
+[topicos]: uso_topicos.md

@@ -8,6 +8,7 @@ nav:
     - Instalación: 'instalacion.md'
     - Modo de Uso:
         - 'uso_extraccion.md'
+        - 'uso_topicos.md'
 
 markdown_extensions:
     - admonition
