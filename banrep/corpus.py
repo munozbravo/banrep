@@ -5,7 +5,7 @@ from pathlib import Path
 from gensim.corpora import Dictionary
 from gensim.models import Phrases
 from gensim.models.phrases import Phraser
-from spacy.tokens import Doc, Span, Token
+from spacy.tokens import Doc, Token
 
 from banrep.documentos import token_cumple, filtrar_frases, token_presente
 
@@ -96,9 +96,10 @@ class MiCorpus:
         -------
         doc : spacy.tokens.Doc
         """
-        if self.wordlists:
-            for tipo in self.wordlists:
-                wordlist = wordlists.get(tipo)
+        listas = self.wordlists
+        if listas:
+            for tipo in listas:
+                wordlist = listas.get(tipo)
                 for token in doc:
                     if token_presente(token, wordlist):
                         token._.set(tipo, True)
