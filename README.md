@@ -1,6 +1,4 @@
-# banrep: Analítica de Texto en el [Banco de la República][web_banrep].
-
-[web_banrep]: http://www.banrep.gov.co/
+# BanRep: Analítica de Texto
 
 [banrep][pypi_banrep] es una librería para analizar conjuntos de documentos textuales.
 
@@ -18,7 +16,7 @@ Visite la [documentación][web_docs] para información detallada de uso.
 |----------------------------|----------------------------------|
 | [Introducción][intro]      | Motivación de la librería        |
 | [Instalación][instalacion] | Cómo instalar en su equipo       |
-| [Extracción][extraccion]         | Cómo usar el módulo de extracción       |
+| [Extracción][extraccion]     | Cómo usar para extracción de documentos    |
 | [Tópicos][topicos]  | Cómo usar para Análisis de Tópicos       |
 
 [intro]: https://munozbravo.github.io/banrep/intro/
