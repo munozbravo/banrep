@@ -9,6 +9,7 @@ nav:
     - Modo de Uso:
         - 'uso_extraccion.md'
         - 'uso_topicos.md'
+    - Vínculos de interés: 'vinculos.md'
 
 markdown_extensions:
     - admonition
