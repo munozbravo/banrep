@@ -1,6 +1,8 @@
 # Instalación
 
-Se recomienda instalar **banrep** en un entorno virtual para no interferir con otras instalaciones de python.
+Se recomienda instalar [banrep][pypi_banrep] en un entorno virtual para no interferir con otras instalaciones de python.
+
+[pypi_banrep]: https://pypi.org/project/banrep/
 
 Una opción es descargar [Miniconda3][web_conda], para crear y activar un entorno básico con `conda` que instale `pip`.
 
@@ -19,7 +21,7 @@ conda activate entorno
 
 ## pip
 
-Una vez activado el entorno, instalar usando `pip`. Esto instalará automáticamente las librerías que **banrep** requiere.
+Una vez activado el entorno, instalar usando `pip`. Esto instalará automáticamente las librerías que [banrep][pypi_banrep] requiere.
 
 ```bash
 pip install banrep
