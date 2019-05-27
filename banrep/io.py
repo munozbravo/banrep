@@ -81,7 +81,7 @@ def iterar_registros(directorio, aleatorio=False, chars=0, parrafos=False):
         Información de cada documento (texto, (archivo, fuente)).
     """
     for archivo in iterar_rutas(directorio, aleatorio=aleatorio):
-        comun = {'archivo': archivo.name, 'fuente': archivo.parent.name}
+        comun = {"archivo": archivo.name, "fuente": archivo.parent.name}
         texto = leer_texto(archivo)
 
         if chars:
@@ -91,25 +91,25 @@ def iterar_registros(directorio, aleatorio=False, chars=0, parrafos=False):
             i = 1
             for p in texto.splitlines():
                 if p:
-                    info = {'parrafo': i, **comun}
+                    info = {"parrafo": i, **comun}
                     i += 1
                     yield p, info
         else:
-            info = {'parrafo': 'no', **comun}
+            info = {"parrafo": "no", **comun}
             yield texto, info
 
 
-def leer_palabras(archivo, hoja, col_grupo="type", col_set="word"):
+def leer_palabras(archivo, hoja, col_grupo="type", col_palabras="word"):
     """Extrae grupos de palabras de un archivo Excel.
 
-    Agrupa `col_set` por columna `col_grupo` de hoja `hoja` de archivo Excel.
+    Agrupa `col_palabras` por columna `col_grupo` de hoja `hoja` de archivo Excel.
 
     Parameters
     ----------
     archivo : str | Path
     hoja : str
     col_grupo : str
-    col_set : str
+    col_palabras : str
 
     Returns
     -------
@@ -117,7 +117,7 @@ def leer_palabras(archivo, hoja, col_grupo="type", col_set="word"):
        Grupos de palabras en cada grupo.
     """
     df = pd.read_excel(archivo, sheet_name=hoja)
-    grupos = {k: set(v) for k, v in df.groupby(col_grupo)[col_set]}
+    grupos = {k: set(v) for k, v in df.groupby(col_grupo)[col_palabras]}
 
     return grupos
 
@@ -141,7 +141,7 @@ def df_crear_textos(df, col_id, col_texto, directorio):
     None
     """
     salida = Path(directorio).resolve()
-    df['nombres'] = df[col_id].apply(lambda x: salida.joinpath(f"{x}.txt"))
-    df.apply(lambda x: guardar_texto(x[col_texto], x['nombres']), axis=1)
+    df["nombres"] = df[col_id].apply(lambda x: salida.joinpath(f"{x}.txt"))
+    df.apply(lambda x: guardar_texto(x[col_texto], x["nombres"]), axis=1)
 
     return
