@@ -17,10 +17,12 @@ Visite la [documentación][web_docs] para información detallada de uso.
 | [Introducción][intro]      | Motivación de la librería        |
 | [Instalación][instalacion] | Cómo instalar en su equipo       |
 | [Extracción][extraccion]         | Cómo usar el módulo de extracción       |
+| [Tópicos][topicos]  | Cómo usar para Análisis de Tópicos       |
 
 [intro]: https://munozbravo.github.io/banrep/intro/
 [instalacion]: https://munozbravo.github.io/banrep/instalacion/
 [extraccion]: https://munozbravo.github.io/banrep/uso_extraccion/
+[topicos]: https://munozbravo.github.io/banrep/uso_topicos/
 
 ----
 
@@ -71,4 +73,4 @@ Cuando se piensa usar el mismo modelo para diferentes proyectos, una alternativa
 
 ----
 
-### TODO: modelos
+### TODO: sentimiento
