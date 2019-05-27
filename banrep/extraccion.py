@@ -21,7 +21,8 @@ def extraer_info(archivo):
     tuple (str, dict)
         Texto y Metadata.
     """
-    ruta = Path(archivo)
+    ruta = Path(archivo).resolve()
+
     if ruta.is_file():
         try:
             info = parser.from_file(str(ruta))
@@ -39,7 +40,7 @@ def extraer_info(archivo):
     return texto, metadata
 
 
-def extraer_archivos(dir_docs, dir_textos, aleatorio=False):
+def extraer_archivos(dir_docs, dir_textos):
     """Extrae y guarda texto de cada archivo en directorio si no existe.
 
     Parameters
@@ -54,11 +55,11 @@ def extraer_archivos(dir_docs, dir_textos, aleatorio=False):
     int
         Número de documentos procesados.
     """
-    dirdocs = Path(dir_docs)
-    dirtextos = crear_directorio(nombre=dir_textos)
+    dirdocs = Path(dir_docs).resolve()
+    dirtextos = crear_directorio(dir_textos)
 
     n = 0
-    for ruta in iterar_rutas(dirdocs, aleatorio=aleatorio):
+    for ruta in iterar_rutas(dirdocs):
         archivo = dirtextos.joinpath(f"{ruta.stem}.txt")
         if not archivo.exists():
             texto, metadata = extraer_info(ruta)
@@ -87,11 +88,10 @@ def main():
     args = parser.parse_args()
 
     entrada = args.entrada
-    salida = args.salida
+    salida = Path(args.salida).resolve()
 
     n = extraer_archivos(entrada, salida)
-    full = Path(salida).resolve()
-    print(f"{n} nuevos archivos guardados en directorio {str(full)}")
+    print(f"{n} nuevos archivos guardados en directorio {str(salida)}")
 
 
 if __name__ == "__main__":

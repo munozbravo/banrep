@@ -10,7 +10,7 @@ Una necesidad común para analizar texto es poder extraerlo de archivos pdf, wor
 
 ### Línea de comandos
 
-Con su [entorno virtual activado][install], desde la línea de comandos puede extraer el texto de cada archivo que tenga guardado en una carpeta, y almacenarlo en un nuevo archivo que será guardado en una nueva carpeta.
+Con su [entorno virtual activado][install], desde la línea de comandos puede extraer el texto de cada archivo que tenga guardado en una carpeta, y almacenarlo en un nuevo archivo *.txt* que será guardado en una nueva carpeta.
 
 ```bash
 # En este ejemplo tiene documentos en carpeta ~/Downloads/docs/
@@ -33,18 +33,19 @@ python -m banrep.extraccion ~/Downloads/docs/
 Para importar en python y usar las funciones individualmente:
 
 ```python
-from banrep.extraccion import extraer_texto, guardar_texto, procesar_todos
+from banrep.io import guardar_texto
+from banrep.extraccion import extraer_info, extraer_archivos
 
 # Extrae el texto de pdf y lo asigna a una variable.
-texto = extraer_texto('mi-super-archivo.pdf')
+texto = extraer_info('mi-super-archivo.pdf')
 
 # Guarda el texto extraído.
-guardar_texto(texto, 'mi-super-archivo.txt', filas=True)
+guardar_texto(texto, 'mi-super-archivo.txt')
 
 # Extrae texto de archivos en un directorio
 # y almacena nuevos archivos en carpeta textos.
 # Devuelve el número de archivos procesados.
-n = procesar_todos('algun/directorio/', 'textos', filas=True)
+n = extraer_archivos('algun/directorio/', 'textos')
 
 print(f'{n} archivos procesados')
 ```
