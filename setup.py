@@ -29,5 +29,5 @@ setup(
     ],
     python_requires="~=3.7",
     include_package_data=True,
-    install_requires=["spacy>=2.1.3", "tika>=1.19"],
+    install_requires=["gensim>=3.4", "pandas>=0.24", "spacy>=2.1", "tika>=1.19"],
 )
