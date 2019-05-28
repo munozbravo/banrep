@@ -36,7 +36,7 @@
     
     
       
-        <title>Extracción - BanRep</title>
+        <title>Extraer texto de documentos - BanRep</title>
       
     
     
@@ -102,7 +102,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#extraccion" tabindex="1" class="md-skip">
+      <a href="#extraer-texto-de-documentos" tabindex="1" class="md-skip">
         Saltar a contenido
       </a>
     
@@ -127,7 +127,7 @@
               BanRep
             </span>
             <span class="md-header-nav__topic">
-              Extracción
+              Extraer texto de documentos
             </span>
           
         </div>
@@ -302,8 +302,8 @@
       
     
     
-    <a href="./" title="Extracción" class="md-nav__link md-nav__link--active">
-      Extracción
+    <a href="./" title="Extraer texto de documentos" class="md-nav__link md-nav__link--active">
+      Extraer texto de documentos
     </a>
     
   </li>
@@ -315,8 +315,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../uso_topicos/" title="Cómo usar para Análisis de Tópicos" class="md-nav__link">
-      Cómo usar para Análisis de Tópicos
+    <a href="../uso_topicos/" title="Análisis de Tópicos" class="md-nav__link">
+      Análisis de Tópicos
     </a>
   </li>
 
@@ -366,11 +366,17 @@
               
                 
                 
-                <h1 id="extraccion">Extracción</h1>
-<p>Para usar <a href="https://pypi.org/project/banrep/">banrep</a> se recomienda hacerlo dentro de un entorno virtual. Puede ver la sección de <a href="../instalacion/">instalación</a> para instrucciones sobre cómo crearlo y activarlo.</p>
-<h2>Extraer texto de documentos</h2>
+                <h1 id="extraer-texto-de-documentos">Extraer texto de documentos</h1>
 <p>Una necesidad común para analizar texto es poder extraerlo de archivos pdf, word, powerpoint o similares, que usualmente están almacenados en una carpeta en disco.</p>
-<h3>Línea de comandos</h3>
+<div class="admonition note">
+<p class="admonition-title">Uso de entorno virtual</p>
+<p>Para usar <a href="https://pypi.org/project/banrep/">banrep</a> se recomienda hacerlo dentro de un entorno virtual. Puede ver la sección de <a href="../instalacion/">instalación</a> para instrucciones sobre cómo crearlo y activarlo.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Uso de Apache Tika</p>
+<p>La extracción de texto hace uso de <a href="http://tika.apache.org/download.html">Apache Tika Server</a>, una reconocida librería de Java. El uso de los comandos de extracción que se muestran en esta página asume que se cuenta con una copia de dicha librería. Si no se tiene, automáticamente se descargará una <a href="https://www.apache.org/dyn/closer.cgi/tika/tika-server-1.21.jar">copia</a>, y por tanto se requiere acceso a internet y la posibilidad de descargar ejecutables.</p>
+</div>
+<h2>Línea de comandos</h2>
 <p>Con su <a href="../instalacion/">entorno virtual activado</a>, desde la línea de comandos puede extraer el texto de cada archivo que tenga guardado en una carpeta, y almacenarlo en un nuevo archivo <em>.txt</em> que será guardado en una nueva carpeta.</p>
 <div class="codehilite"><pre><span></span><span class="c1"># En este ejemplo tiene documentos en carpeta ~/Downloads/docs/</span>
 <span class="c1"># Resultado será almacenado en ~Downloads/corpus</span>
@@ -387,7 +393,7 @@ python -m banrep.extraccion ~/Downloads/docs/
 </pre></div>
 
 
-<h3>Librería</h3>
+<h2>Librería</h2>
 <p>Para importar en python y usar las funciones individualmente:</p>
 <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">banrep.io</span> <span class="kn">import</span> <span class="n">guardar_texto</span>
 <span class="kn">from</span> <span class="nn">banrep.extraccion</span> <span class="kn">import</span> <span class="n">extraer_info</span><span class="p">,</span> <span class="n">extraer_archivos</span>
@@ -407,7 +413,7 @@ python -m banrep.extraccion ~/Downloads/docs/
 </pre></div>
 
 
-<h3>Ayuda</h3>
+<h2>Ayuda</h2>
 <p>Para ayuda sobre las funciones disponibles, desde python puede usar <code>help</code>.</p>
 <div class="codehilite"><pre><span></span>python
 &gt;&gt;&gt; from banrep import extraccion
@@ -448,13 +454,13 @@ python -m banrep.extraccion ~/Downloads/docs/
           </a>
         
         
-          <a href="../uso_topicos/" title="Cómo usar para Análisis de Tópicos" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../uso_topicos/" title="Análisis de Tópicos" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Siguiente
                 </span>
-                Cómo usar para Análisis de Tópicos
+                Análisis de Tópicos
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
