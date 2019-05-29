@@ -95,7 +95,7 @@ def iterar_registros(directorio, aleatorio=False, chars=0, parrafos=False):
                     i += 1
                     yield p, info
         else:
-            info = {"parrafo": "no", **comun}
+            info = {"parrafo": 0, **comun}
             yield texto, info
 
 
@@ -145,3 +145,33 @@ def df_crear_textos(df, col_id, col_texto, directorio):
     df.apply(lambda x: guardar_texto(x[col_texto], x["nombres"]), axis=1)
 
     return
+
+
+class Textos:
+    """Colección de textos almacenados en un directorio.
+
+    Itera rutas en directorio, opcionalmente aleatoriamente, y extrae texto y metadata de cada archivo.
+    Iteración puede ser el texto de un archivo o cada párrafo en él, fltrando líneas según longitud.
+    """
+
+    def __init__(self, directorio, aleatorio=False, chars=0, parrafos=False):
+        self.directorio = Path(directorio).resolve()
+        self.aleatorio = aleatorio
+        self.chars = chars
+        self.parrafos = parrafos
+
+    def __repr__(self):
+        return f"Textos de directorio {self.directorio.name}, {self.__len__()} archivos leídos."
+
+    def __len__(self):
+        return len(list(self.__iter__()))
+
+    def __iter__(self):
+        """Iterar devuelve texto, meta de cada archivo."""
+        for texto, meta in iterar_registros(
+            self.directorio,
+            aleatorio=self.aleatorio,
+            chars=self.chars,
+            parrafos=self.parrafos,
+        ):
+            yield texto, meta
