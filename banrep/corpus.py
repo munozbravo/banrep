@@ -14,9 +14,10 @@ class MiCorpus:
     """Colección de documentos."""
 
     def __init__(
-        self, lang, registros=None, filtros=None, ngrams=None, id2word=None, long=0, wordlists=None
+        self, lang, datos=None, filtros=None, ngrams=None, id2word=None, long=0, wordlists=None
     ):
         self.lang = lang
+        self.datos = datos
         self.filtros = filtros
         self.ngrams = ngrams
         self.id2word = id2word
@@ -31,8 +32,8 @@ class MiCorpus:
         if self.wordlists:
             self.lang.add_pipe(self.tokens_presentes, last=True)
 
-        if registros:
-            self.agregar_docs(registros)
+        if datos:
+            self.docs = [doc for doc in self.crear_docs(datos)]
 
             if not self.ngrams:
                 self.ngrams = self.model_ngrams()
@@ -42,7 +43,7 @@ class MiCorpus:
 
     def __repr__(self):
         return (
-            f"Corpus con {len(self.docs)} docs y {len(self.id2word)} palabras únicas."
+            f"Corpus con {self.__len__()} docs y {len(self.id2word)} palabras únicas."
         )
 
     def __len__(self):
@@ -94,7 +95,7 @@ class MiCorpus:
 
         Returns
         -------
-        doc : spacy.tokens.Doc
+        spacy.tokens.Doc
         """
         listas = self.wordlists
         if listas:
@@ -106,20 +107,24 @@ class MiCorpus:
 
         return doc
 
-    def agregar_docs(self, datos):
-        """Agrega un flujo de documentos con texto y metadata.
+    def crear_docs(self, datos):
+        """Crea documentos a partir de textos y su metadata.
 
         Parameters
         ----------
         datos : Iterable[Tuple(str, dict)]
             Texto y Metadata de cada documento.
+
+        Yields
+        ------
+        spacy.tokens.Doc
         """
         for doc, meta in self.lang.pipe(datos, as_tuples=True):
-            self.docs.append(doc)
+            doc._.archivo = meta.get("archivo")
+            doc._.fuente = meta.get("fuente")
+            doc._.parrafo = meta.get("parrafo")
 
-            doc._.archivo = meta["archivo"]
-            doc._.fuente = meta["fuente"]
-            doc._.parrafo = meta["parrafo"]
+            yield doc
 
     def desagregar(self):
         """Desagrega un documento en frases compuestas por palabras.
