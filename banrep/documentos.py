@@ -10,21 +10,25 @@ def token_cumple(token, filtros=None):
     token : spacy.tokens.Token
         Token a evaluar.
     filtros : dict, optional
-        (stopwords, postags, entities)
+        (is_alpha, stopwords, postags, entities)
 
     Returns
     -------
     bool
         Si token pasa los filtros o no.
     """
+    if not filtros:
+        return True
+
+    stopwords = filtros.get('stopwords')
+    postags = filtros.get("postags")
+    entities = filtros.get("entities")
+
     cumple = (
-        (token.is_alpha)
-        and (not token.like_url)
-        and (not token.like_num)
-        and (not token.like_email)
-        and (token.lower_ not in filtros.get("stopwords"))
-        and (token.pos_ not in filtros.get("postags"))
-        and (token.ent_type_ not in filtros.get("entities"))
+        (True if not filtros.get('is_alpha') else token.is_alpha)
+        and (True if not stopwords else token.lower_ not in stopwords)
+        and (True if not postags else token.pos_ not in postags)
+        and (True if not entities else token.ent_type_ not in entities)
     )
 
     return cumple
@@ -38,7 +42,7 @@ def filtrar_tokens(contenedor, filtros=None):
     contenedor : spacy.tokens.Doc | spacy.tokens.Span
         Estructura de la cual se filtran tokens.
     filtros : dict, optional
-        (alpha, stopwords, postags, entities)
+        (is_alpha, stopwords, postags, entities)
 
     Returns
     -------
