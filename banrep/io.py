@@ -161,7 +161,7 @@ class Textos:
         self.parrafos = parrafos
 
     def __repr__(self):
-        return f"Textos de directorio {self.directorio.name}, {self.__len__()} archivos leídos."
+        return f"Textos de directorio {self.directorio.name}, {self.__len__()} textos leídos."
 
     def __len__(self):
         return len(list(self.__iter__()))

@@ -5,16 +5,21 @@ from pathlib import Path
 from gensim.corpora import Dictionary
 from gensim.models import Phrases
 from gensim.models.phrases import Phraser
-from spacy.tokens import Doc, Token
-
-from banrep.documentos import token_cumple, filtrar_frases, token_presente
+from spacy.tokens import Doc, Span, Token
 
 
 class MiCorpus:
     """Colección de documentos."""
 
     def __init__(
-        self, lang, datos=None, filtros=None, ngrams=None, id2word=None, long=0, wordlists=None
+        self,
+        lang,
+        datos=None,
+        filtros=None,
+        ngrams=None,
+        id2word=None,
+        long=0,
+        wordlists=None,
     ):
         self.lang = lang
         self.datos = datos
@@ -59,6 +64,9 @@ class MiCorpus:
         if not Token.has_extension("cumple"):
             Token.set_extension("cumple", default=True)
 
+        if not Span.has_extension("longspan"):
+            Span.set_extension("longspan", getter=lambda x: len(x) > self.long)
+
         exts = ["archivo", "fuente", "parrafo", "frases", "palabras"]
         for ext in exts:
             if not Doc.has_extension(ext):
@@ -102,7 +110,7 @@ class MiCorpus:
             for tipo in listas:
                 wordlist = listas.get(tipo)
                 for token in doc:
-                    if token_presente(token, wordlist):
+                    if token.lower_ in wordlist:
                         token._.set(tipo, True)
 
         return doc
@@ -136,9 +144,10 @@ class MiCorpus:
         """
         for doc in self.docs:
             frases = []
-            for frase in filtrar_frases(doc, n_tokens=self.long):
-                tokens = [tok for tok in frase if tok._.get("cumple")]
-                frases.append(tokens)
+            for sent in doc.sents:
+                if sent._.get("longspan"):
+                    tokens = [tok for tok in sent if tok._.get("cumple")]
+                    frases.append(tokens)
 
             if not doc._.palabras:
                 palabras = [t for tokens in frases for t in tokens]
@@ -214,3 +223,34 @@ class MiCorpus:
 
         return id2word
 
+
+def token_cumple(token, filtros=None):
+    """Determina si token pasa los filtros.
+
+    Parameters
+    ----------
+    token : spacy.tokens.Token
+        Token a evaluar.
+    filtros : dict, optional
+        (is_alpha, stopwords, postags, entities)
+
+    Returns
+    -------
+    bool
+        Si token pasa los filtros o no.
+    """
+    if not filtros:
+        return True
+
+    stopwords = filtros.get("stopwords")
+    postags = filtros.get("postags")
+    entities = filtros.get("entities")
+
+    cumple = (
+        (True if not filtros.get("is_alpha") else token.is_alpha)
+        and (True if not stopwords else token.lower_ not in stopwords)
+        and (True if not postags else token.pos_ not in postags)
+        and (True if not entities else token.ent_type_ not in entities)
+    )
+
+    return cumple
