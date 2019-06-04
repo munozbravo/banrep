@@ -16,12 +16,14 @@ def verificar_oov(doc):
 
    Returns
    -------
-   list (str, int)
+   pd.DataFrame
       Tokens oov en frecuencia decreciente.
    """
-    c = Counter(tok.text for tok in doc if tok.is_oov)
+    c = Counter(tok.text for tok in doc if tok.is_oov).items()
+    df = pd.DataFrame(c, columns=['token', 'freq'])
+    df = df.sort_values(by='freq', ascending=False).reset_index(drop=True)
 
-    return sorted(c.items(), key=lambda i: i[1], reverse=True)
+    return df
 
 
 def calcular_coherencias(modelos, corpus, medida="c_v"):
