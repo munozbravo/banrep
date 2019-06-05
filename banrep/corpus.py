@@ -1,6 +1,5 @@
 # coding: utf-8
 """Módulo para crear corpus de documentos."""
-from pathlib import Path
 
 from gensim.corpora import Dictionary
 from gensim.models import Phrases
@@ -145,7 +144,6 @@ class MiCorpus:
         doc._.set("palabras", palabras)
 
         return doc
-
 
     def crear_docs(self, datos):
         """Crea documentos a partir de textos y su metadata.
