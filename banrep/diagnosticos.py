@@ -89,7 +89,7 @@ def palabras_probables(modelo, topico, n=15):
 
 
 def corpus_stats(corpus):
-    """Distribución de probabilidad de tópicos en cada documento.
+    """Estadísticas del corpus.
 
     Parameters
     ----------
@@ -106,10 +106,39 @@ def corpus_stats(corpus):
         ([doc._.get(ext) for ext in exts] for doc in corpus.docs), columns=exts
     )
 
+    return stats
+
+
+def corpus_tokens(corpus):
+    """Tokens del corpus.
+
+    Parameters
+    ----------
+    corpus : banrep.corpus.MiCorpus
+        Corpus previamente inicializado con documentos
+
+    Returns
+    -------
+        pd.DataFrame
+            Estadisticas de cada token del corpus.
+    """
+    columnas = ['doc_id', 'sent_id', 'tok_id', 'word', 'pos']
+    items = []
+    for i, frases in enumerate(corpus.desagregar()):
+        doc = corpus.docs[i]
+        s = 0
+        for frase in frases:
+            s += 1
+            for tok in frase:
+                fila = [doc._.get('doc_id'), s, tok.i, tok.lower_, tok.pos_]
+                if corpus.wordlists:
+                    for tipo in corpus.wordlists:
+                        fila.append(tok._.get(tipo))
+
+                items.append(fila)
+
     if corpus.wordlists:
         for tipo in corpus.wordlists:
-            stats[tipo] = [
-                sum([token._.get(tipo) for token in doc]) for doc in corpus.docs
-            ]
+            columnas.append(tipo)
 
-    return stats
+    return pd.DataFrame(items, columns=columnas)
