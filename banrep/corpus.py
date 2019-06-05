@@ -230,10 +230,6 @@ class MiCorpus:
 
             yield palabras
 
-    def docs_a_palabras(self):
-        for palabras in self.obtener_palabras():
-            yield palabras
-
     def crear_id2word(self):
         """Crea diccionario de todas las palabras procesadas del corpus.
 
