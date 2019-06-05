@@ -1,9 +1,7 @@
 # coding: utf-8
 """Módulo para funciones de diagnóstico de datos usados y modelos generados."""
 from collections import Counter
-from pathlib import Path
 
-from gensim.models import CoherenceModel
 import pandas as pd
 
 
@@ -24,32 +22,6 @@ def verificar_oov(doc):
     df = df.sort_values(by='freq', ascending=False).reset_index(drop=True)
 
     return df
-
-
-def calcular_coherencias(modelos, corpus, medida="c_v"):
-    """Calcula Coherence Score de modelos de tópicos.
-
-   Parameters
-    ----------
-   modelos : list (gensim.models.ldamodel.LdaModel)
-      Modelos LDA para diferentes números de tópicos.
-   corpus : banrep.corpus.MiCorpus
-      Corpus previamente inicializado con documentos.
-   medida : str
-      Medida de Coherencia a usar (u_mass, c_v, c_uci, c_npmi).
-
-   Yields
-    ------
-    float
-      Coherencia calculada.
-   """
-    textos = [texto for texto in corpus.docs_a_palabras()]
-    for modelo in modelos:
-        cm = CoherenceModel(
-            model=modelo, texts=textos, dictionary=corpus.id2word, coherence=medida
-        )
-
-        yield cm.get_coherence()
 
 
 def docs_topicos(modelo, corpus):
