@@ -31,9 +31,15 @@ class MiCorpus:
 
         self.docs = []
 
+        self.exts_doc = {"doc_id", "archivo", "fuente", "frases", "palabras"}
+        self.exts_span = {"longspan"}
+        self.exts_token = {"cumple"}
+
         self.fijar_extensiones()
 
         self.lang.add_pipe(self.tokens_incumplen, last=True)
+        self.lang.add_pipe(self.doc_cumplen, last=True)
+
         if self.wordlists:
             self.lang.add_pipe(self.tokens_presentes, last=True)
 
@@ -48,7 +54,7 @@ class MiCorpus:
 
     def __repr__(self):
         return (
-            f"Corpus con {self.__len__()} docs y {len(self.id2word)} palabras únicas."
+            f"Corpus con {len(self.docs)} docs y {len(self.id2word)} palabras únicas."
         )
 
     def __len__(self):
@@ -61,21 +67,23 @@ class MiCorpus:
 
     def fijar_extensiones(self):
         """Fijar extensiones globalmente."""
-        if not Token.has_extension("cumple"):
-            Token.set_extension("cumple", default=True)
-
-        if not Span.has_extension("longspan"):
-            Span.set_extension("longspan", getter=lambda x: len(x) > self.long)
-
-        exts = ["archivo", "fuente", "parrafo", "frases", "palabras"]
-        for ext in exts:
+        for ext in self.exts_doc:
             if not Doc.has_extension(ext):
                 Doc.set_extension(ext, default=None)
+
+        for ext in self.exts_span:
+            if not Span.has_extension(ext):
+                Span.set_extension(ext, getter=lambda x: len(x) > self.long)
+
+        for ext in self.exts_token:
+            if not Token.has_extension(ext):
+                Token.set_extension(ext, default=True)
 
         if self.wordlists:
             for tipo in self.wordlists:
                 if not Token.has_extension(tipo):
                     Token.set_extension(tipo, default=False)
+                    self.exts_token.add(tipo)
 
     def tokens_incumplen(self, doc):
         """Cambia el valor de la extension cumple (Token) si falla filtros.
@@ -115,6 +123,30 @@ class MiCorpus:
 
         return doc
 
+    def doc_cumplen(self, doc):
+        """Fija valor de extensiones que cuentan frases y palabras que cumplen.
+
+        Parameters
+        ----------
+        doc : spacy.tokens.Doc
+
+        Returns
+        -------
+        doc : spacy.tokens.Doc
+        """
+        frases = 0
+        palabras = 0
+        for sent in doc.sents:
+            if sent._.get("longspan"):
+                frases += 1
+                palabras += len([tok for tok in sent if tok._.get("cumple")])
+
+        doc._.set("frases", frases)
+        doc._.set("palabras", palabras)
+
+        return doc
+
+
     def crear_docs(self, datos):
         """Crea documentos a partir de textos y su metadata.
 
@@ -128,9 +160,9 @@ class MiCorpus:
         spacy.tokens.Doc
         """
         for doc, meta in self.lang.pipe(datos, as_tuples=True):
-            doc._.archivo = meta.get("archivo")
-            doc._.fuente = meta.get("fuente")
-            doc._.parrafo = meta.get("parrafo")
+            for ext in self.exts_doc:
+                if meta.get(ext):
+                    doc._.set(ext, meta.get(ext))
 
             yield doc
 
@@ -148,13 +180,6 @@ class MiCorpus:
                 if sent._.get("longspan"):
                     tokens = [tok for tok in sent if tok._.get("cumple")]
                     frases.append(tokens)
-
-            if not doc._.palabras:
-                palabras = [t for tokens in frases for t in tokens]
-                doc._.palabras = len(palabras)
-
-            if not doc._.frases:
-                doc._.frases = len(frases)
 
             yield frases
 

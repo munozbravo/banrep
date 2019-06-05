@@ -78,9 +78,11 @@ def iterar_registros(directorio, aleatorio=False, chars=0, parrafos=False):
     Yields
     ------
     tuple (str, dict)
-        Información de cada documento (texto, (archivo, fuente)).
+        Información de cada documento (texto, metadata).
     """
+    d = 0
     for archivo in iterar_rutas(directorio, aleatorio=aleatorio):
+        d += 1
         comun = {"archivo": archivo.name, "fuente": archivo.parent.name}
         texto = leer_texto(archivo)
 
@@ -91,11 +93,11 @@ def iterar_registros(directorio, aleatorio=False, chars=0, parrafos=False):
             i = 1
             for p in texto.splitlines():
                 if p:
-                    info = {"parrafo": i, **comun}
+                    info = {"doc_id": f"d{d}p{i}", **comun}
                     i += 1
                     yield p, info
         else:
-            info = {"parrafo": 0, **comun}
+            info = {"doc_id": f"d{d}p0", **comun}
             yield texto, info
 
 
@@ -151,7 +153,7 @@ class Textos:
     """Colección de textos almacenados en un directorio.
 
     Itera rutas en directorio, opcionalmente aleatoriamente, y extrae texto y metadata de cada archivo.
-    Iteración puede ser el texto de un archivo o cada párrafo en él, fltrando líneas según longitud.
+    Iteración puede ser el texto de un archivo o cada párrafo en él, filtrando líneas según longitud.
     """
 
     def __init__(self, directorio, aleatorio=False, chars=0, parrafos=False):
