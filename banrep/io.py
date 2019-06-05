@@ -93,11 +93,12 @@ def iterar_registros(directorio, aleatorio=False, chars=0, parrafos=False):
             i = 1
             for p in texto.splitlines():
                 if p:
-                    info = {"doc_id": f"d{d}p{i}", **comun}
+                    info = {"doc_id": f"d{d:0>4}p{i:0>3}", **comun}
                     i += 1
                     yield p, info
         else:
-            info = {"doc_id": f"d{d}p0", **comun}
+            i = 0
+            info = {"doc_id": f"d{d:0>4}p{i:0>3}", **comun}
             yield texto, info
 
 
