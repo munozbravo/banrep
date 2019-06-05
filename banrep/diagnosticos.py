@@ -18,8 +18,8 @@ def verificar_oov(doc):
       Tokens oov en frecuencia decreciente.
    """
     c = Counter(tok.text for tok in doc if tok.is_oov).items()
-    df = pd.DataFrame(c, columns=['token', 'freq'])
-    df = df.sort_values(by='freq', ascending=False).reset_index(drop=True)
+    df = pd.DataFrame(c, columns=["token", "freq"])
+    df = df.sort_values(by="freq", ascending=False).reset_index(drop=True)
 
     return df
 
@@ -83,7 +83,33 @@ def palabras_probables(modelo, topico, n=15):
         modelo.show_topic(topico, n), columns=["palabra", "probabilidad"]
     ).sort_values(by="probabilidad")
 
-    df['topico'] = topico
+    df["topico"] = topico
 
     return df
 
+
+def corpus_stats(corpus):
+    """Distribución de probabilidad de tópicos en cada documento.
+
+    Parameters
+    ----------
+    corpus : banrep.corpus.MiCorpus
+       Corpus previamente inicializado con documentos.
+
+    Returns
+    -------
+    pd.DataFrame
+      Estadísticas de cada documento del corpus.
+    """
+    exts = corpus.exts_doc
+    stats = pd.DataFrame(
+        ([doc._.get(ext) for ext in exts] for doc in corpus.docs), columns=exts
+    )
+
+    if corpus.wordlists:
+        for tipo in corpus.wordlists:
+            stats[tipo] = [
+                sum([token._.get(tipo) for token in doc]) for doc in corpus.docs
+            ]
+
+    return stats
