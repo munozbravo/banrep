@@ -31,13 +31,13 @@ class MiCorpus:
         self.docs = []
 
         self.exts_doc = ("doc_id", "archivo", "fuente", "frases", "palabras")
-        self.exts_span = {"longspan"}
-        self.exts_token = {"cumple"}
+        self.exts_span = {"ok_span"}
+        self.exts_token = {"ok_token"}
 
         self.fijar_extensiones()
 
-        self.lang.add_pipe(self.tokens_incumplen, last=True)
-        self.lang.add_pipe(self.doc_cumplen, last=True)
+        self.lang.add_pipe(self.evaluar_tokens, last=True)
+        self.lang.add_pipe(self.conteos_doc, last=True)
 
         if self.wordlists:
             self.lang.add_pipe(self.tokens_presentes, last=True)
@@ -84,7 +84,7 @@ class MiCorpus:
                     Token.set_extension(tipo, default=False)
                     self.exts_token.add(tipo)
 
-    def tokens_incumplen(self, doc):
+    def evaluar_tokens(self, doc):
         """Cambia el valor de la extension cumple (Token) si falla filtros.
 
         Parameters
@@ -97,7 +97,7 @@ class MiCorpus:
         """
         for token in doc:
             if not token_cumple(token, filtros=self.filtros):
-                token._.set("cumple", False)
+                token._.set("ok_token", False)
 
         return doc
 
@@ -122,7 +122,7 @@ class MiCorpus:
 
         return doc
 
-    def doc_cumplen(self, doc):
+    def conteos_doc(self, doc):
         """Fija valor de extensiones que cuentan frases y palabras que cumplen.
 
         Parameters
@@ -136,9 +136,9 @@ class MiCorpus:
         frases = 0
         palabras = 0
         for sent in doc.sents:
-            if sent._.get("longspan"):
+            if sent._.get("ok_span"):
                 frases += 1
-                palabras += len([tok for tok in sent if tok._.get("cumple")])
+                palabras += len([tok for tok in sent if tok._.get("ok_token")])
 
         doc._.set("frases", frases)
         doc._.set("palabras", palabras)
@@ -164,8 +164,29 @@ class MiCorpus:
 
             yield doc
 
+    @staticmethod
+    def frases_doc(doc):
+        """Desagrega documento en frases compuestas por palabras que cumplen.
+
+        Parameters
+        ----------
+        doc : spacy.tokens.Doc
+
+        Returns
+        -------
+        list[list(spacy.tokens.Token)]
+            Palabras de cada frase en documento.
+        """
+        frases = []
+        for sent in doc.sents:
+            if sent._.get("ok_span"):
+                tokens = [tok for tok in sent if tok._.get("ok_token")]
+                frases.append(tokens)
+
+        return frases
+
     def desagregar(self):
-        """Desagrega un documento en frases compuestas por palabras.
+        """Desagrega cada documento en frases compuestas por palabras.
 
         Yields
         ------
@@ -173,13 +194,7 @@ class MiCorpus:
             Palabras de cada frase en un documento.
         """
         for doc in self.docs:
-            frases = []
-            for sent in doc.sents:
-                if sent._.get("longspan"):
-                    tokens = [tok for tok in sent if tok._.get("cumple")]
-                    frases.append(tokens)
-
-            yield frases
+            yield self.frases_doc(doc)
 
     def iterar_frases(self):
         """Itera todas las frases del corpus.
