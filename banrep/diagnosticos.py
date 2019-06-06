@@ -73,7 +73,7 @@ def palabras_probables(modelo, topico, n=15):
    modelo : gensim.models.ldamodel.LdaModel
       Modelo LDA entrenado.
    topico : int
-      Número del Tópico
+      Número del Tópico.
    n : int
       Cuantas palabras obtener.
 
@@ -117,12 +117,12 @@ def corpus_tokens(corpus):
     Parameters
     ----------
     corpus : banrep.corpus.MiCorpus
-        Corpus previamente inicializado con documentos
+        Corpus previamente inicializado con documentos.
 
     Returns
     -------
-        pd.DataFrame
-            Estadisticas de cada token del corpus.
+    pd.DataFrame
+        Estadisticas de cada token del corpus.
     """
     columnas = ["doc_id", "sent_id", "tok_id", "word", "pos"]
     items = []
@@ -132,12 +132,47 @@ def corpus_tokens(corpus):
 
     for doc in corpus.docs:
         sent_id = 1
+
         for frase in corpus.frases_doc(doc):
+            tok_id = 1
             for tok in frase:
-                fila = [doc._.get("doc_id"), sent_id, tok.i, tok.lower_, tok.pos_]
+                fila = [doc._.get("doc_id"), sent_id, tok_id, tok.lower_, tok.pos_]
+                tok_id += 1
+
                 if corpus.wordlists:
                     for tipo in corpus.wordlists:
                         fila.append(tok._.get(tipo))
+
+                items.append(fila)
+
+            sent_id += 1
+
+    return pd.DataFrame(items, columns=columnas)
+
+
+def corpus_ngramed(corpus):
+    """Tokens del corpus con ngramas.
+
+    Parameters
+    ----------
+    corpus : banrep.corpus.MiCorpus
+        Corpus previamente inicializado con documentos.
+
+    Returns
+    -------
+    pd.DataFrame
+        Estadisticas de cada token del corpus.
+    """
+    columnas = ["doc_id", "sent_id", "tok_id", "word"]
+    items = []
+    for doc in corpus.docs:
+        sent_id = 1
+
+        for frase in corpus.ngram_frases(doc):
+            tok_id = 1
+            for tok in frase:
+                fila = [doc._.get("doc_id"), sent_id, tok_id, tok]
+                tok_id += 1
 
                 items.append(fila)
 
