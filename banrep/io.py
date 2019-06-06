@@ -80,9 +80,8 @@ def iterar_registros(directorio, aleatorio=False, chars=0, parrafos=False):
     tuple (str, dict)
         Información de cada documento (texto, metadata).
     """
-    d = 0
+    doc_id = 1
     for archivo in iterar_rutas(directorio, aleatorio=aleatorio):
-        d += 1
         comun = {"archivo": archivo.name, "fuente": archivo.parent.name}
         texto = leer_texto(archivo)
 
@@ -90,15 +89,15 @@ def iterar_registros(directorio, aleatorio=False, chars=0, parrafos=False):
             texto = filtrar_cortas(texto, chars=chars)
 
         if parrafos:
-            i = 1
             for p in texto.splitlines():
                 if p:
-                    info = {"doc_id": f"d{d:0>4}p{i:0>3}", **comun}
-                    i += 1
+                    info = {"doc_id": f"{doc_id:0>6}", **comun}
+                    doc_id += 1
                     yield p, info
+
         else:
-            i = 0
-            info = {"doc_id": f"d{d:0>4}p{i:0>3}", **comun}
+            info = {"doc_id": f"{doc_id:0>6}", **comun}
+            doc_id += 1
             yield texto, info
 
 
