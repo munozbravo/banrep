@@ -40,7 +40,7 @@ def docs_topicos(modelo, corpus):
       Documentos X Tópicos.
     """
     data = (dict(doc) for doc in modelo[corpus])
-    index = [doc._.get('doc_id') for doc in corpus.docs]
+    index = [doc._.get("doc_id") for doc in corpus.docs]
 
     return pd.DataFrame(data=data, index=index)
 
@@ -124,23 +124,23 @@ def corpus_tokens(corpus):
         pd.DataFrame
             Estadisticas de cada token del corpus.
     """
-    columnas = ['doc_id', 'sent_id', 'tok_id', 'word', 'pos']
+    columnas = ["doc_id", "sent_id", "tok_id", "word", "pos"]
     items = []
-    for i, frases in enumerate(corpus.desagregar()):
-        doc = corpus.docs[i]
-        s = 0
-        for frase in frases:
-            s += 1
+    if corpus.wordlists:
+        for tipo in corpus.wordlists:
+            columnas.append(tipo)
+
+    for doc in corpus.docs:
+        sent_id = 1
+        for frase in corpus.frases_doc(doc):
             for tok in frase:
-                fila = [doc._.get('doc_id'), s, tok.i, tok.lower_, tok.pos_]
+                fila = [doc._.get("doc_id"), sent_id, tok.i, tok.lower_, tok.pos_]
                 if corpus.wordlists:
                     for tipo in corpus.wordlists:
                         fila.append(tok._.get(tipo))
 
                 items.append(fila)
 
-    if corpus.wordlists:
-        for tipo in corpus.wordlists:
-            columnas.append(tipo)
+            sent_id += 1
 
     return pd.DataFrame(items, columns=columnas)
