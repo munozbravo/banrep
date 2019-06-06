@@ -39,7 +39,10 @@ def docs_topicos(modelo, corpus):
     pd.DataFrame
       Documentos X Tópicos.
     """
-    return pd.DataFrame(dict(doc) for doc in modelo[corpus])
+    data = (dict(doc) for doc in modelo[corpus])
+    index = [doc._.get('doc_id') for doc in corpus.docs]
+
+    return pd.DataFrame(data=data, index=index)
 
 
 def topico_dominante(df):
@@ -78,10 +81,10 @@ def palabras_probables(modelo, topico, n=15):
    -------
    pd.DataFrame
       Palabras y sus probabilidades.
-   """
-    df = pd.DataFrame(
-        modelo.show_topic(topico, n), columns=["palabra", "probabilidad"]
-    ).sort_values(by="probabilidad")
+    """
+    data = modelo.show_topic(topico, n)
+    df = pd.DataFrame(data=data, columns=["palabra", "probabilidad"])
+    df = df.sort_values(by="probabilidad", ascending=False)
 
     df["topico"] = topico
 
@@ -102,9 +105,8 @@ def corpus_stats(corpus):
       Estadísticas de cada documento del corpus.
     """
     exts = corpus.exts_doc
-    stats = pd.DataFrame(
-        ([doc._.get(ext) for ext in exts] for doc in corpus.docs), columns=exts
-    )
+    data = ([doc._.get(ext) for ext in exts] for doc in corpus.docs)
+    stats = pd.DataFrame(data=data, columns=exts)
 
     return stats
 
