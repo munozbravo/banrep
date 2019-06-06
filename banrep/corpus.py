@@ -30,7 +30,7 @@ class MiCorpus:
 
         self.docs = []
 
-        self.exts_doc = ("doc_id", "archivo", "fuente", "frases", "palabras")
+        self.exts_doc = ["doc_id", "archivo", "fuente", "frases", "palabras"]
         self.exts_span = {"ok_span"}
         self.exts_token = {"ok_token"}
 
@@ -96,7 +96,7 @@ class MiCorpus:
         doc : spacy.tokens.Doc
         """
         for token in doc:
-            if not token_cumple(token, filtros=self.filtros):
+            if not self.token_cumple(token, filtros=self.filtros):
                 token._.set("ok_token", False)
 
         return doc
@@ -185,17 +185,6 @@ class MiCorpus:
 
         return frases
 
-    def desagregar(self):
-        """Desagrega cada documento en frases compuestas por palabras.
-
-        Yields
-        ------
-        Iterable[list[list(spacy.tokens.Token)]]
-            Palabras de cada frase en un documento.
-        """
-        for doc in self.docs:
-            yield self.frases_doc(doc)
-
     def iterar_frases(self):
         """Itera todas las frases del corpus.
 
@@ -204,9 +193,9 @@ class MiCorpus:
         Iterable[list(str)]
             Palabras de una frase.
         """
-        for doc_ in self.desagregar():
-            for frase in doc_:
-                yield (tok.lower_ for tok in frase)
+        for doc in self.docs:
+            for frase in self.frases_doc(doc):
+                yield [tok.lower_ for tok in frase]
 
     def model_ngrams(self):
         """Crea modelos de ngramas a partir de frases.
@@ -225,21 +214,36 @@ class MiCorpus:
 
         return dict(bigrams=bigrams, trigrams=trigrams)
 
+    def ngram_frases(self, doc):
+        """Frases palabras de un documento, ya con ngramas.
+
+        Parameters
+        ----------
+        doc : spacy.tokens.Doc
+
+        Returns
+        -------
+        list[list(str)]
+        """
+        bigrams = self.ngrams.get("bigrams")
+        trigrams = self.ngrams.get("trigrams")
+
+        doc_ = self.frases_doc(doc)
+        frases = trigrams[bigrams[[[t.lower_ for t in frase] for frase in doc_]]]
+
+        return list(frases)
+
     def obtener_palabras(self):
-        """Palabras de un documento, ya procesadas para identificar ngramas.
+        """Palabras de cada documento, ya con ngramas.
 
         Yields
         ------
         Iterable[list(str)]
             Palabras de un documento.
         """
-        bigrams = self.ngrams.get("bigrams")
-        trigrams = self.ngrams.get("trigrams")
-
-        for doc_ in self.desagregar():
-            palabras = []
-            for tokens in doc_:
-                palabras.extend(trigrams[bigrams[(t.lower_ for t in tokens)]])
+        for doc in self.docs:
+            frases = self.ngram_frases(doc)
+            palabras = [token for frase in frases for token in frase]
 
             yield palabras
 
@@ -257,34 +261,34 @@ class MiCorpus:
 
         return id2word
 
+    @staticmethod
+    def token_cumple(token, filtros=None):
+        """Determina si token pasa los filtros.
 
-def token_cumple(token, filtros=None):
-    """Determina si token pasa los filtros.
+        Parameters
+        ----------
+        token : spacy.tokens.Token
+            Token a evaluar.
+        filtros : dict, optional
+            (is_alpha, stopwords, postags, entities)
 
-    Parameters
-    ----------
-    token : spacy.tokens.Token
-        Token a evaluar.
-    filtros : dict, optional
-        (is_alpha, stopwords, postags, entities)
+        Returns
+        -------
+        bool
+            Si token pasa los filtros o no.
+        """
+        if not filtros:
+            return True
 
-    Returns
-    -------
-    bool
-        Si token pasa los filtros o no.
-    """
-    if not filtros:
-        return True
+        stopwords = filtros.get("stopwords")
+        postags = filtros.get("postags")
+        entities = filtros.get("entities")
 
-    stopwords = filtros.get("stopwords")
-    postags = filtros.get("postags")
-    entities = filtros.get("entities")
+        cumple = (
+            (True if not filtros.get("is_alpha") else token.is_alpha)
+            and (True if not stopwords else token.lower_ not in stopwords)
+            and (True if not postags else token.pos_ not in postags)
+            and (True if not entities else token.ent_type_ not in entities)
+        )
 
-    cumple = (
-        (True if not filtros.get("is_alpha") else token.is_alpha)
-        and (True if not stopwords else token.lower_ not in stopwords)
-        and (True if not postags else token.pos_ not in postags)
-        and (True if not entities else token.ent_type_ not in entities)
-    )
-
-    return cumple
+        return cumple
