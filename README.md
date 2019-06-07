@@ -1,6 +1,6 @@
 # BanRep: Analítica de Texto
 
-[banrep][pypi_banrep] es una librería para analizar conjuntos de documentos textuales.
+[banrep][pypi_banrep] es una librería en Python para analizar conjuntos de documentos textuales.
 
 [pypi_banrep]: https://pypi.org/project/banrep/
 
