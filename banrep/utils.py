@@ -43,7 +43,11 @@ def iterar_rutas(directorio, aleatorio=False):
         Ruta de archivo.
     """
     absoluto = Path(directorio).resolve()
-    rutas = (ruta for ruta in absoluto.glob("**/*") if ruta.is_file())
+    rutas = (
+        ruta
+        for ruta in absoluto.glob("**/*")
+        if ruta.is_file() and not ruta.name.startswith(".")
+    )
 
     todas = sorted(rutas)
     if aleatorio:
