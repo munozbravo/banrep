@@ -22,18 +22,21 @@ def leer_texto(archivo):
        Texto de archivo.
     """
     ruta = Path(archivo).resolve()
+    nombre = ruta.name
+    carpeta = ruta.parent.name
 
-    if ruta.is_file():
-        try:
-            with open(ruta, encoding="utf-8") as f:
-                texto = f.read()
+    try:
+        with open(ruta, encoding="utf-8") as f:
+            texto = f.read()
 
-        except Exception:
-            print(f"No pudo extraerse información de {ruta.name}.")
-            texto = ""
-
-    else:
-        print(f"{ruta.name} no es un archivo.")
+    except OSError:
+        print(f"No puede abrirse archivo {nombre} en {carpeta}.")
+        texto = ""
+    except UnicodeDecodeError:
+        print(f"No puede leerse archivo {nombre} en {carpeta}.")
+        texto = ""
+    except Exception:
+        print(f"Error inesperado leyendo {nombre} en {carpeta}")
         texto = ""
 
     return texto
@@ -82,23 +85,24 @@ def iterar_registros(directorio, aleatorio=False, chars=0, parrafos=False):
     """
     doc_id = 1
     for archivo in iterar_rutas(directorio, aleatorio=aleatorio):
-        comun = {"archivo": archivo.name, "fuente": archivo.parent.name}
         texto = leer_texto(archivo)
+        if texto:
+            if chars:
+                texto = filtrar_cortas(texto, chars=chars)
 
-        if chars:
-            texto = filtrar_cortas(texto, chars=chars)
+            comun = {"archivo": archivo.name, "fuente": archivo.parent.name}
 
-        if parrafos:
-            for p in texto.splitlines():
-                if p:
-                    info = {"doc_id": f"{doc_id:0>6}", **comun}
-                    doc_id += 1
-                    yield p, info
+            if parrafos:
+                for p in texto.splitlines():
+                    if p:
+                        info = {"doc_id": f"{doc_id:0>6}", **comun}
+                        doc_id += 1
+                        yield p, info
 
-        else:
-            info = {"doc_id": f"{doc_id:0>6}", **comun}
-            doc_id += 1
-            yield texto, info
+            else:
+                info = {"doc_id": f"{doc_id:0>6}", **comun}
+                doc_id += 1
+                yield texto, info
 
 
 def leer_palabras(archivo, hoja, col_grupo="type", col_palabras="word"):
@@ -163,10 +167,16 @@ class Textos:
         self.parrafos = parrafos
 
     def __repr__(self):
-        return f"Textos de directorio {self.directorio.name}, {self.__len__()} textos leídos."
+        return f"{self.__len__()} archivos en directorio {self.directorio.name}."
 
     def __len__(self):
-        return len(list(self.__iter__()))
+        return len(
+            list(
+                f
+                for f in self.directorio.glob("**/*")
+                if f.is_file() and not f.name.startswith(".")
+            )
+        )
 
     def __iter__(self):
         """Iterar devuelve texto, meta de cada archivo."""
