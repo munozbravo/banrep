@@ -365,21 +365,31 @@
                 
                 
                 <h1 id="instalacion">Instalación</h1>
+<p>Se requiere tener instalado <a href="https://www.python.org/downloads/">Python 3.7</a>.</p>
+<p>Si es la primera vez que va a instalar este lenguaje de programación, se recomienda instalarlo usando <a href="https://www.anaconda.com/distribution/">Anaconda3</a> o <a href="https://conda.io/miniconda.html">Miniconda3</a>. Siga las instrucciones de instalación para su sistema.</p>
+<div class="admonition note">
+<p class="admonition-title">Uso de entorno virtual</p>
 <p>Se recomienda instalar <a href="https://pypi.org/project/banrep/">banrep</a> en un entorno virtual para no interferir con otras instalaciones de python.</p>
-<p>Una opción es descargar <a href="https://conda.io/miniconda.html">Miniconda3</a>, para crear y activar un entorno básico con <code>conda</code> que instale <code>pip</code>.</p>
+</div>
+<p>Tanto Anaconda como Miniconda instalan un programa llamado <code>conda</code>, para crear y activar un entorno virtual que instale <code>pip</code>.</p>
+<p>Desde la <em>línea de comandos</em> (<a href="https://support.apple.com/guide/terminal/welcome/mac">Terminal</a> en macOS, <a href="https://docs.anaconda.com/anaconda/install/verify-install/">Anaconda Prompt</a> en windows):</p>
 <div class="codehilite"><pre><span></span><span class="c1"># crear un entorno...</span>
-conda create --name entorno <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.7 pip
+conda create --name entorno <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.7 pip jupyterlab
+</pre></div>
 
-<span class="c1"># confirmar que quiere descargar lo solicitado...</span>
+
+<div class="codehilite"><pre><span></span><span class="c1"># confirmar que quiere descargar lo solicitado...</span>
 Proceed <span class="o">([</span>y<span class="o">]</span>/n<span class="o">)</span>? y
+</pre></div>
 
-<span class="c1"># activar el entorno creado...</span>
+
+<div class="codehilite"><pre><span></span><span class="c1"># activar el entorno creado...</span>
 conda activate entorno
 </pre></div>
 
 
 <h2>pip</h2>
-<p>Una vez activado el entorno, instalar usando <code>pip</code>. Esto instalará automáticamente las librerías que <a href="https://pypi.org/project/banrep/">banrep</a> requiere.</p>
+<p>Una vez activado el entorno, instalar <a href="https://pypi.org/project/banrep/">banrep</a> usando <code>pip</code>. Esto instalará automáticamente las librerías que se requieren.</p>
 <div class="codehilite"><pre><span></span>pip install banrep
 </pre></div>
 
@@ -392,6 +402,19 @@ conda activate entorno
 
 
 <p>Cuando se piensa usar el mismo modelo para diferentes proyectos, una alternativa es hacer una <a href="https://spacy.io/usage/models#download-manual">instalación manual</a>: descargar el <a href="https://github.com/explosion/spacy-models/releases/download/es_core_news_md-2.1.0/es_core_news_md-2.1.0.tar.gz">archivo del modelo</a>, guardarlo en el directorio deseado, y crear un <a href="https://spacy.io/usage/models#usage-link">vínculo simbólico</a> a dicho modelo.</p>
+<h2>Verificar instalación</h2>
+<p>Puede verificar si <a href="https://pypi.org/project/banrep/">banrep</a> instaló correctamente usando <code>python</code> o <code>jupyter lab</code> desde la línea de comandos:</p>
+<div class="codehilite"><pre><span></span>python
+&gt;&gt;&gt; from banrep.curpus import MiCorpus
+&gt;&gt;&gt;
+</pre></div>
+
+
+<p>Si no aparece ningún error quiere decir que la instalación fue exitosa.</p>
+<div class="admonition info">
+<p class="admonition-title">Sobre JupyterLab</p>
+<p>Si quiere obtener mayor información sobre el uso de JupyterLab puede consultar su <a href="https://jupyterlab.readthedocs.io/en/stable/">documentación</a></p>
+</div>
                 
                   
                 
