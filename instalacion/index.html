@@ -374,7 +374,7 @@
 <p>Tanto Anaconda como Miniconda instalan un programa llamado <code>conda</code>, para crear y activar un entorno virtual que instale <code>pip</code>.</p>
 <p>Desde la <em>línea de comandos</em> (<a href="https://support.apple.com/guide/terminal/welcome/mac">Terminal</a> en macOS, <a href="https://docs.anaconda.com/anaconda/install/verify-install/">Anaconda Prompt</a> en windows):</p>
 <div class="codehilite"><pre><span></span><span class="c1"># crear un entorno...</span>
-conda create --name entorno <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.7 pip jupyterlab
+~$ conda create --name entorno <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.7 pip jupyterlab
 </pre></div>
 
 
@@ -384,27 +384,27 @@ Proceed <span class="o">([</span>y<span class="o">]</span>/n<span class="o">)</s
 
 
 <div class="codehilite"><pre><span></span><span class="c1"># activar el entorno creado...</span>
-conda activate entorno
+~$ conda activate entorno
 </pre></div>
 
 
 <h2>pip</h2>
 <p>Una vez activado el entorno, instalar <a href="https://pypi.org/project/banrep/">banrep</a> usando <code>pip</code>. Esto instalará automáticamente las librerías que se requieren.</p>
-<div class="codehilite"><pre><span></span>pip install banrep
+<div class="codehilite"><pre><span></span>~$ pip install banrep
 </pre></div>
 
 
 <h2>Modelo de Lenguaje Natural</h2>
 <p>Se requiere un modelo pre-entrenado de <a href="https://spacy.io/models">Spacy</a>, que depende del idioma del texto que se quiera procesar.</p>
 <p>Existen diversas formas de instalar, la más fácil es usando <code>download</code>.</p>
-<div class="codehilite"><pre><span></span>python -m spacy download es_core_news_md
+<div class="codehilite"><pre><span></span>~$ python -m spacy download es_core_news_md
 </pre></div>
 
 
 <p>Cuando se piensa usar el mismo modelo para diferentes proyectos, una alternativa es hacer una <a href="https://spacy.io/usage/models#download-manual">instalación manual</a>: descargar el <a href="https://github.com/explosion/spacy-models/releases/download/es_core_news_md-2.1.0/es_core_news_md-2.1.0.tar.gz">archivo del modelo</a>, guardarlo en el directorio deseado, y crear un <a href="https://spacy.io/usage/models#usage-link">vínculo simbólico</a> a dicho modelo.</p>
 <h2>Verificar instalación</h2>
 <p>Puede verificar si <a href="https://pypi.org/project/banrep/">banrep</a> instaló correctamente usando <code>python</code> o <code>jupyter lab</code> desde la línea de comandos:</p>
-<div class="codehilite"><pre><span></span>python
+<div class="codehilite"><pre><span></span>~$ python
 &gt;&gt;&gt; from banrep.corpus import MiCorpus
 &gt;&gt;&gt;
 </pre></div>
