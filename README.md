@@ -91,7 +91,7 @@ Puede verificar si [banrep][pypi_banrep] instaló correctamente usando `python` 
 
 ```bash
 python
->>> from banrep.curpus import MiCorpus
+>>> from banrep.corpus import MiCorpus
 >>>
 ```
 
