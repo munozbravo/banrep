@@ -22,7 +22,7 @@ Desde la *línea de comandos* ([Terminal][terminal] en macOS, [Anaconda Prompt][
 
 ```bash
 # crear un entorno...
-conda create --name entorno python=3.7 pip jupyterlab
+~$ conda create --name entorno python=3.7 pip jupyterlab
 ```
 
 ```bash
@@ -32,7 +32,7 @@ Proceed ([y]/n)? y
 
 ```bash
 # activar el entorno creado...
-conda activate entorno
+~$ conda activate entorno
 ```
 
 ## pip
@@ -40,7 +40,7 @@ conda activate entorno
 Una vez activado el entorno, instalar [banrep][pypi_banrep] usando `pip`. Esto instalará automáticamente las librerías que se requieren.
 
 ```bash
-pip install banrep
+~$ pip install banrep
 ```
 
 ## Modelo de Lenguaje Natural
@@ -52,7 +52,7 @@ Se requiere un modelo pre-entrenado de [Spacy][spacy_models], que depende del id
 Existen diversas formas de instalar, la más fácil es usando `download`.
 
 ```bash
-python -m spacy download es_core_news_md
+~$ python -m spacy download es_core_news_md
 ```
 
 Cuando se piensa usar el mismo modelo para diferentes proyectos, una alternativa es hacer una [instalación manual][spacy_manual]: descargar el [archivo del modelo][spacy_esmd], guardarlo en el directorio deseado, y crear un [vínculo simbólico][spacy_link] a dicho modelo.
@@ -65,7 +65,7 @@ Cuando se piensa usar el mismo modelo para diferentes proyectos, una alternativa
 Puede verificar si [banrep][pypi_banrep] instaló correctamente usando `python` o `jupyter lab` desde la línea de comandos:
 
 ```bash
-python
+~$ python
 >>> from banrep.corpus import MiCorpus
 >>>
 ```

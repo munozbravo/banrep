@@ -20,9 +20,11 @@ Con su [entorno virtual activado][install], desde la línea de comandos puede ex
 
 ```bash
 # En este ejemplo tiene documentos en carpeta ~/Downloads/docs/
-# Resultado será almacenado en ~Downloads/corpus
+# Textos serán almacenado en ~Downloads/corpus/
+# Asume directorio de trabajo será ~Downloads/
 
-python -m banrep.extraccion ~/Downloads/docs/ --salida corpus
+~$ cd Downloads/
+~/Downloads$ python -m banrep.extraccion docs/ --salida corpus
 ```
 
 Si se omite directorio de salida se crea uno llamado `textos`.
@@ -31,7 +33,7 @@ Si se omite directorio de salida se crea uno llamado `textos`.
 # No se especifica --salida
 # Resultado será almacenado en ~Downloads/textos
 
-python -m banrep.extraccion ~/Downloads/docs/
+~/Downloads$ python -m banrep.extraccion docs/
 ```
 
 ## Librería
@@ -51,7 +53,7 @@ guardar_texto(texto, 'mi-super-archivo.txt')
 # Extrae texto de archivos en un directorio
 # y almacena nuevos archivos en carpeta textos.
 # Devuelve el número de archivos procesados.
-n = extraer_archivos('algun/directorio/', 'textos')
+n = extraer_archivos('~Downloads/docs/', 'textos')
 
 print(f'{n} archivos procesados')
 ```
@@ -61,7 +63,7 @@ print(f'{n} archivos procesados')
 Para ayuda sobre las funciones disponibles, desde python puede usar `help`.
 
 ```bash
-python
+~$ python
 >>> from banrep import extraccion
 >>> help(extraccion)
 ```
