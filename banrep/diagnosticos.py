@@ -124,11 +124,10 @@ def corpus_tokens(corpus):
     pd.DataFrame
         Estadisticas de cada token del corpus.
     """
-    columnas = ["doc_id", "sent_id", "tok_id", "word", "pos"]
+    exts_token = list(corpus.exts_token)
+
+    columnas = ["doc_id", "sent_id", "tok_id", "word", "pos"] + exts_token
     items = []
-    if corpus.wordlists:
-        for tipo in corpus.wordlists:
-            columnas.append(tipo)
 
     for doc in corpus.docs:
         sent_id = 1
@@ -137,11 +136,9 @@ def corpus_tokens(corpus):
             tok_id = 1
             for tok in frase:
                 fila = [doc._.get("doc_id"), sent_id, tok_id, tok.lower_, tok.pos_]
+                for ext in exts_token:
+                    fila.append(tok._.get(ext))
                 tok_id += 1
-
-                if corpus.wordlists:
-                    for tipo in corpus.wordlists:
-                        fila.append(tok._.get(tipo))
 
                 items.append(fila)
 
@@ -194,8 +191,8 @@ def frases_stats(corpus):
     pd.DataFrame
       Estadísticas de cada frase del corpus.
     """
-    exts_span = corpus.exts_span
-    exts_token = corpus.exts_token
+    exts_span = list(corpus.exts_span)
+    exts_token = list(corpus.exts_token)
 
     columnas = ["doc_id", "sent_id"] + exts_span + exts_token
     items = []
