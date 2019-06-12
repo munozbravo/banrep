@@ -13,26 +13,28 @@ class MiCorpus:
     def __init__(
         self,
         lang,
+        corta=0,
         datos=None,
         filtros=None,
         ngrams=None,
         id2word=None,
-        long=0,
         wordlists=None,
+        express=None,
     ):
         self.lang = lang
+        self.corta = corta
         self.datos = datos
         self.filtros = filtros
         self.ngrams = ngrams
         self.id2word = id2word
-        self.long = long
         self.wordlists = wordlists
+        self.express = express
 
         self.docs = []
 
-        self.exts_doc = ["doc_id", "archivo", "fuente", "frases", "palabras"]
-        self.exts_span = {"ok_span"}
-        self.exts_token = {"ok_token"}
+        self.exts_doc = {"doc_id", "archivo", "fuente", "frases", "palabras"}
+        self.exts_span = set()
+        self.exts_token = set()
 
         self.fijar_extensiones()
 
@@ -70,13 +72,24 @@ class MiCorpus:
             if not Doc.has_extension(ext):
                 Doc.set_extension(ext, default=None)
 
-        for ext in self.exts_span:
-            if not Span.has_extension(ext):
-                Span.set_extension(ext, getter=lambda x: len(x) > self.long)
+        if not Span.has_extension("ok_span"):
+            Span.set_extension("ok_span", getter=lambda x: len(x) > self.corta)
+            self.exts_span.add("ok_span")
 
-        for ext in self.exts_token:
-            if not Token.has_extension(ext):
-                Token.set_extension(ext, default=True)
+        if self.express:
+            for tipo in self.express:
+                if not Span.has_extension(tipo):
+                    Span.set_extension(
+                        tipo,
+                        getter=lambda x: any(
+                            (expr in x.text) for expr in self.express.get(tipo)
+                        ),
+                    )
+                    self.exts_span.add(tipo)
+
+        if not Token.has_extension("ok_token"):
+            Token.set_extension("ok_token", default=True)
+            self.exts_token.add("ok_token")
 
         if self.wordlists:
             for tipo in self.wordlists:
