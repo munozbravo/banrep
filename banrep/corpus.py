@@ -242,9 +242,11 @@ class MiCorpus:
         trigrams = self.ngrams.get("trigrams")
 
         doc_ = self.frases_doc(doc)
-        frases = trigrams[bigrams[[[t.lower_ for t in frase] for frase in doc_]]]
+        frases = []
+        for frase in doc_:
+            frases.append(list(trigrams[bigrams[[t.lower_ for t in frase]]]))
 
-        return list(frases)
+        return frases
 
     def obtener_palabras(self):
         """Palabras de cada documento, ya con ngramas.
