@@ -32,7 +32,7 @@ class MiCorpus:
 
         self.docs = []
 
-        self.exts_doc = {"doc_id", "archivo", "fuente", "frases", "palabras"}
+        self.exts_doc = ["doc_id", "archivo", "fuente", "frases", "palabras"]
         self.exts_span = set()
         self.exts_token = set()
 
