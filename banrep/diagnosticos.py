@@ -179,3 +179,37 @@ def corpus_ngramed(corpus):
             sent_id += 1
 
     return pd.DataFrame(items, columns=columnas)
+
+
+def frases_stats(corpus):
+    """Estadísticas de frases.
+
+    Parameters
+    ----------
+    corpus : banrep.corpus.MiCorpus
+       Corpus previamente inicializado con documentos.
+
+    Returns
+    -------
+    pd.DataFrame
+      Estadísticas de cada frase del corpus.
+    """
+    exts_span = corpus.exts_span
+    exts_token = corpus.exts_token
+
+    columnas = ["doc_id", "sent_id"] + exts_span + exts_token
+    items = []
+
+    for doc in corpus.docs:
+        sent_id = 1
+        for sent in doc.sents:
+            fila = [doc._.get("doc_id"), sent_id]
+            for ext in exts_span:
+                fila.append(sent._.get(ext))
+            for ext in exts_token:
+                fila.append(sum(tok._.get(ext) for tok in sent))
+
+            items.append(fila)
+            sent_id += 1
+
+    return pd.DataFrame(items, columns=columnas)
