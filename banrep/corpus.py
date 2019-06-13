@@ -5,6 +5,7 @@ from gensim.corpora import Dictionary
 from gensim.models import Phrases
 from gensim.models.phrases import Phraser
 from spacy.tokens import Doc, Span, Token
+import pandas as pd
 
 
 class MiCorpus:
@@ -13,28 +14,28 @@ class MiCorpus:
     def __init__(
         self,
         lang,
-        corta=0,
         datos=None,
         filtros=None,
         ngrams=None,
         id2word=None,
         wordlists=None,
         express=None,
+        corta=0,
     ):
         self.lang = lang
-        self.corta = corta
         self.datos = datos
         self.filtros = filtros
         self.ngrams = ngrams
         self.id2word = id2word
         self.wordlists = wordlists
         self.express = express
+        self.corta = corta
 
         self.docs = []
 
         self.exts_doc = ["doc_id", "archivo", "fuente", "frases", "palabras"]
-        self.exts_span = set()
-        self.exts_token = set()
+        self.exts_span = []
+        self.exts_token = []
 
         self.fijar_extensiones()
 
@@ -74,7 +75,8 @@ class MiCorpus:
 
         if not Span.has_extension("ok_span"):
             Span.set_extension("ok_span", getter=lambda x: len(x) > self.corta)
-            self.exts_span.add("ok_span")
+            if "ok_span" not in self.exts_span:
+                self.exts_span.append("ok_span")
 
         if self.express:
             for tipo in self.express:
@@ -85,17 +87,20 @@ class MiCorpus:
                             (expr in x.text) for expr in self.express.get(tipo)
                         ),
                     )
-                    self.exts_span.add(tipo)
+                    if tipo not in self.exts_span:
+                        self.exts_span.append(tipo)
 
         if not Token.has_extension("ok_token"):
             Token.set_extension("ok_token", default=True)
-            self.exts_token.add("ok_token")
+            if "ok_token" not in self.exts_token:
+                self.exts_token.append("ok_token")
 
         if self.wordlists:
             for tipo in self.wordlists:
                 if not Token.has_extension(tipo):
                     Token.set_extension(tipo, default=False)
-                    self.exts_token.add(tipo)
+                    if tipo not in self.exts_token:
+                        self.exts_token.append(tipo)
 
     def evaluar_tokens(self, doc):
         """Cambia el valor de la extension cumple (Token) si falla filtros.
@@ -307,3 +312,101 @@ class MiCorpus:
         )
 
         return cumple
+
+    def corpus_stats(self):
+        """Estadísticas del corpus.
+
+        Returns
+        -------
+        pd.DataFrame
+            Estadísticas de cada documento del corpus.
+        """
+        data = []
+        for doc in self.docs:
+            data.append([doc._.get(ext) for ext in self.exts_doc])
+
+        return pd.DataFrame(data=data, columns=self.exts_doc)
+
+    def corpus_tokens(self):
+        """Tokens del corpus.
+
+        Returns
+        -------
+        pd.DataFrame
+            Estadisticas de cada token del corpus.
+        """
+        exts_token = list(self.exts_token)
+
+        columnas = ["doc_id", "sent_id", "tok_id", "word", "pos"] + exts_token
+        items = []
+
+        for doc in self.docs:
+            sent_id = 1
+
+            for frase in self.frases_doc(doc):
+                tok_id = 1
+                for tok in frase:
+                    fila = [doc._.get("doc_id"), sent_id, tok_id, tok.lower_, tok.pos_]
+                    for ext in exts_token:
+                        fila.append(tok._.get(ext))
+                    tok_id += 1
+
+                    items.append(fila)
+
+                sent_id += 1
+
+        return pd.DataFrame(items, columns=columnas)
+
+    def corpus_ngramed(self):
+        """Tokens del corpus con ngramas.
+
+        Returns
+        -------
+        pd.DataFrame
+            Estadisticas de cada token del corpus.
+        """
+        columnas = ["doc_id", "sent_id", "tok_id", "word"]
+        items = []
+
+        for doc in self.docs:
+            sent_id = 1
+
+            for frase in self.ngram_frases(doc):
+                tok_id = 1
+                for tok in frase:
+                    fila = [doc._.get("doc_id"), sent_id, tok_id, tok]
+                    tok_id += 1
+
+                    items.append(fila)
+
+                sent_id += 1
+
+        return pd.DataFrame(items, columns=columnas)
+
+    def frases_stats(self):
+        """Estadísticas de frases.
+
+        Returns
+        -------
+        pd.DataFrame
+            Estadísticas de cada frase del corpus.
+        """
+        exts_span = list(self.exts_span)
+        exts_token = list(self.exts_token)
+
+        columnas = ["doc_id", "sent_id"] + exts_span + exts_token
+        items = []
+
+        for doc in self.docs:
+            sent_id = 1
+            for sent in doc.sents:
+                fila = [doc._.get("doc_id"), sent_id]
+                for ext in exts_span:
+                    fila.append(sent._.get(ext))
+                for ext in exts_token:
+                    fila.append(sum(tok._.get(ext) for tok in sent))
+
+                items.append(fila)
+                sent_id += 1
+
+        return pd.DataFrame(items, columns=columnas)
