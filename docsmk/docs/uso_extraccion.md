@@ -3,7 +3,9 @@
 Una necesidad común para analizar texto es poder extraerlo de archivos pdf, word, powerpoint o similares, que usualmente están almacenados en una carpeta en disco.
 
 !!! note "Uso de entorno virtual"
-    Para usar [banrep][pypi_banrep] se recomienda hacerlo dentro de un entorno virtual. Puede ver la sección de [instalación][install] para instrucciones sobre cómo crearlo y activarlo.
+    Para usar [banrep][pypi_banrep] se recomienda hacerlo dentro de un entorno virtual.
+
+    Puede ver la sección de [instalación][install] para instrucciones sobre cómo crearlo y activarlo.
 
 [pypi_banrep]: https://pypi.org/project/banrep/
 [install]: instalacion.md
