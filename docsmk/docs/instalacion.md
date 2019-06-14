@@ -40,7 +40,7 @@ Proceed ([y]/n)? y
 Una vez activado el entorno, instalar [banrep][pypi_banrep] usando `pip`. Esto instalará automáticamente las librerías que se requieren.
 
 ```bash
-~$ pip install banrep
+~$ pip install --upgrade banrep
 ```
 
 ## Modelo de Lenguaje Natural
