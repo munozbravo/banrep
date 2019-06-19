@@ -4,6 +4,7 @@
 from gensim.corpora import Dictionary
 from gensim.models import Phrases
 from gensim.models.phrases import Phraser
+from spacy.matcher import PhraseMatcher
 from spacy.tokens import Doc, Span, Token
 import pandas as pd
 
@@ -32,6 +33,7 @@ class MiCorpus:
         self.corta = corta
 
         self.docs = []
+        self.matcher = None
 
         self.exts_doc = ["doc_id", "archivo", "fuente", "frases", "palabras"]
         self.exts_span = []
@@ -47,6 +49,7 @@ class MiCorpus:
 
         if datos:
             self.docs = [doc for doc in self.crear_docs(datos)]
+            self.matcher = self.crear_matcher()
 
             if not self.ngrams:
                 self.ngrams = self.model_ngrams()
@@ -78,18 +81,6 @@ class MiCorpus:
             if "ok_span" not in self.exts_span:
                 self.exts_span.append("ok_span")
 
-        if self.express:
-            for tipo in self.express:
-                if not Span.has_extension(tipo):
-                    Span.set_extension(
-                        tipo,
-                        getter=lambda x: any(
-                            (expr in x.text) for expr in self.express.get(tipo)
-                        ),
-                    )
-                    if tipo not in self.exts_span:
-                        self.exts_span.append(tipo)
-
         if not Token.has_extension("ok_token"):
             Token.set_extension("ok_token", default=True)
             if "ok_token" not in self.exts_token:
@@ -119,27 +110,6 @@ class MiCorpus:
 
         return doc
 
-    def tokens_presentes(self, doc):
-        """Cambia valor de extensiones creadas (Token) en caso de wordlists.
-
-        Parameters
-        ----------
-        doc : spacy.tokens.Doc
-
-        Returns
-        -------
-        spacy.tokens.Doc
-        """
-        listas = self.wordlists
-        if listas:
-            for tipo in listas:
-                wordlist = listas.get(tipo)
-                for token in doc:
-                    if token.lower_ in wordlist:
-                        token._.set(tipo, True)
-
-        return doc
-
     def conteos_doc(self, doc):
         """Fija valor de extensiones que cuentan frases y palabras que cumplen.
 
@@ -163,6 +133,27 @@ class MiCorpus:
 
         return doc
 
+    def tokens_presentes(self, doc):
+        """Cambia valor de extensiones creadas (Token) en caso de wordlists.
+
+        Parameters
+        ----------
+        doc : spacy.tokens.Doc
+
+        Returns
+        -------
+        spacy.tokens.Doc
+        """
+        listas = self.wordlists
+        if listas:
+            for tipo in listas:
+                wordlist = listas.get(tipo)
+                for token in doc:
+                    if token.lower_ in wordlist:
+                        token._.set(tipo, True)
+
+        return doc
+
     def crear_docs(self, datos):
         """Crea documentos a partir de textos y su metadata.
 
@@ -181,6 +172,36 @@ class MiCorpus:
                     doc._.set(ext, meta.get(ext))
 
             yield doc
+
+    def crear_matcher(self):
+        """Crea PhraseMatcher para encontrar expresiones en documentos."""
+        matcher = PhraseMatcher(self.lang.vocab)
+
+        for tipo in self.express:
+            patterns = list(self.lang.pipe(self.express.get(tipo)))
+            matcher.add(tipo, None, *patterns)
+
+        return matcher
+
+    def cambiar_entities(self, doc):
+        """Reemplaza entities en doc basado en expresiones identificadas.
+
+        Parameters
+        ----------
+        doc : spacy.tokens.Doc
+
+        Returns
+        -------
+        spacy.tokens.Doc
+        """
+        entities = []
+        for match_id, start, end in self.matcher(doc):
+            span = Span(doc, start, end, label=self.lang.vocab.strings[match_id])
+            entities.append(span)
+
+        doc.ents = entities
+
+        return doc
 
     @staticmethod
     def frases_doc(doc):
@@ -335,11 +356,10 @@ class MiCorpus:
         pd.DataFrame
             Estadisticas de cada token del corpus.
         """
-        exts_token = list(self.exts_token)
+        cols = ["doc_id", "sent_id", "tok_id", "word", "pos"]
+        columnas = cols + self.exts_token
 
-        columnas = ["doc_id", "sent_id", "tok_id", "word", "pos"] + exts_token
         items = []
-
         for doc in self.docs:
             sent_id = 1
 
@@ -347,7 +367,7 @@ class MiCorpus:
                 tok_id = 1
                 for tok in frase:
                     fila = [doc._.get("doc_id"), sent_id, tok_id, tok.lower_, tok.pos_]
-                    for ext in exts_token:
+                    for ext in self.exts_token:
                         fila.append(tok._.get(ext))
                     tok_id += 1
 
@@ -366,8 +386,8 @@ class MiCorpus:
             Estadisticas de cada token del corpus.
         """
         columnas = ["doc_id", "sent_id", "tok_id", "word"]
-        items = []
 
+        items = []
         for doc in self.docs:
             sent_id = 1
 
@@ -391,19 +411,21 @@ class MiCorpus:
         pd.DataFrame
             Estadísticas de cada frase del corpus.
         """
-        exts_span = list(self.exts_span)
-        exts_token = list(self.exts_token)
+        cols = ["doc_id", "sent_id", "frase"]
+        tipos = list(self.express.keys())
+        columnas = cols + self.exts_span + tipos + self.exts_token
 
-        columnas = ["doc_id", "sent_id"] + exts_span + exts_token
         items = []
-
         for doc in self.docs:
+            doc = self.cambiar_entities(doc)
             sent_id = 1
             for sent in doc.sents:
-                fila = [doc._.get("doc_id"), sent_id]
-                for ext in exts_span:
+                fila = [doc._.get("doc_id"), sent_id, sent.text]
+                for ext in self.exts_span:
                     fila.append(sent._.get(ext))
-                for ext in exts_token:
+                for tipo in tipos:
+                    fila.append(any(ent.label_ == tipo for ent in sent.ents))
+                for ext in self.exts_token:
                     fila.append(sum(tok._.get(ext) for tok in sent))
 
                 items.append(fila)
