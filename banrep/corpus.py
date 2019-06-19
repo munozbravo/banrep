@@ -22,6 +22,7 @@ class MiCorpus:
         wordlists=None,
         express=None,
         corta=0,
+        no_above=0.75,
     ):
         self.lang = lang
         self.datos = datos
@@ -31,6 +32,7 @@ class MiCorpus:
         self.wordlists = wordlists
         self.express = express
         self.corta = corta
+        self.no_above = no_above
 
         self.docs = []
         self.matcher = None
@@ -177,9 +179,10 @@ class MiCorpus:
         """Crea PhraseMatcher para encontrar expresiones en documentos."""
         matcher = PhraseMatcher(self.lang.vocab)
 
-        for tipo in self.express:
-            patterns = list(self.lang.pipe(self.express.get(tipo)))
-            matcher.add(tipo, None, *patterns)
+        if self.express:
+            for tipo in self.express:
+                patterns = list(self.lang.pipe(self.express.get(tipo)))
+                matcher.add(tipo, None, *patterns)
 
         return matcher
 
@@ -297,7 +300,7 @@ class MiCorpus:
             Diccionario de todas las palabras procesas y filtradas.
         """
         id2word = Dictionary(palabras for palabras in self.obtener_palabras())
-        id2word.filter_extremes(no_below=5, no_above=0.50)
+        id2word.filter_extremes(no_below=5, no_above=self.no_above)
         id2word.compactify()
 
         return id2word
@@ -412,21 +415,26 @@ class MiCorpus:
             Estadísticas de cada frase del corpus.
         """
         cols = ["doc_id", "sent_id", "frase"]
-        tipos = list(self.express.keys())
-        columnas = cols + self.exts_span + tipos + self.exts_token
+        columnas = cols + self.exts_span + self.exts_token
+        if self.express:
+            tipos = list(self.express.keys())
+            columnas = columnas + tipos
 
         items = []
         for doc in self.docs:
-            doc = self.cambiar_entities(doc)
+            if self.express:
+                doc = self.cambiar_entities(doc)
             sent_id = 1
             for sent in doc.sents:
                 fila = [doc._.get("doc_id"), sent_id, sent.text]
                 for ext in self.exts_span:
                     fila.append(sent._.get(ext))
-                for tipo in tipos:
-                    fila.append(any(ent.label_ == tipo for ent in sent.ents))
                 for ext in self.exts_token:
                     fila.append(sum(tok._.get(ext) for tok in sent))
+
+                if self.express:
+                    for tipo in tipos:
+                        fila.append(any(ent.label_ == tipo for ent in sent.ents))
 
                 items.append(fila)
                 sent_id += 1
