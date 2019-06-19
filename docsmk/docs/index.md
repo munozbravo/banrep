@@ -15,9 +15,9 @@ Guía de navegación a los diferentes temas de esta documentación.
 | [Introducción][intro]      | Motivación de la librería        |
 | [Instalación][instalacion] | Cómo instalar en su equipo       |
 | [Extracción][extraccion]    | Cómo usar para extracción de documentos     |
-| [Tópicos][topicos]  | Cómo usar para Análisis de Tópicos       |
+| [Uso general][general]  | Funcionalidad principal de la librería       |
 
 [intro]: intro.md
 [instalacion]: instalacion.md
 [extraccion]: uso_extraccion.md
-[topicos]: uso_topicos.md
+[general]: uso_general.md

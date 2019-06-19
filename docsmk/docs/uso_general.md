@@ -1,16 +1,16 @@
-# Análisis de Tópicos
+# Uso general
 
-Ver [este ejemplo][ejemplo_topicos] de cómo usar las funciones para análisis de tópicos. Le mostrará línea por línea el uso de las funciones principales. Cada celda viene precedida por una explicación de lo que hace el código de esa celda.
+Ver [este ejemplo][ej_nbviewer] de cómo usar la librería. Le mostrará línea por línea el uso de las funciones principales. Cada celda viene precedida por una explicación de lo que hace el código de esa celda.
 
 !!! info "Visualización PyLDAvis"
-    GitHub no permite mostrar cierto contenido HTML directamente en su vista de Notebooks.
+    GitHub no permite mostrar cierto contenido HTML directamente en su vista de Notebooks, por eso el link anterior usa nbviewer que sí lo permite.
 
-    Si quiere ver la gráfica ejemplo de modelo de tópicos, usar [nbviewer][ej_nbviewer].
+    Si tiene problemas con el link, usar directamente el [notebook en el repositorio][uso_general].
 
 
-[ejemplo_topicos]: https://github.com/munozbravo/banrep/blob/master/banrep/notebooks/ej_topicos.ipynb
+[uso_general]: https://github.com/munozbravo/banrep/blob/master/banrep/notebooks/uso_general.ipynb
 
-[ej_nbviewer]: https://nbviewer.jupyter.org/github/munozbravo/banrep/blob/master/banrep/notebooks/ej_topicos.ipynb#topic=0&lambda=1&term=
+[ej_nbviewer]: https://nbviewer.jupyter.org/github/munozbravo/banrep/blob/master/banrep/notebooks/uso_general.ipynb
 
 
 !!! note "Uso de entorno virtual"

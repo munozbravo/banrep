@@ -17,12 +17,12 @@ Visite la [documentación][web_docs] para información detallada de uso.
 | [Introducción][intro]      | Motivación de la librería        |
 | [Instalación][instalacion] | Cómo instalar en su equipo       |
 | [Extracción][extraccion]     | Cómo usar para extracción de documentos    |
-| [Tópicos][topicos]  | Cómo usar para Análisis de Tópicos       |
+| [Uso general][general]  | Funcionalidad principal de la librería       |
 
 [intro]: https://munozbravo.github.io/banrep/intro/
 [instalacion]: https://munozbravo.github.io/banrep/instalacion/
 [extraccion]: https://munozbravo.github.io/banrep/uso_extraccion/
-[topicos]: https://munozbravo.github.io/banrep/uso_topicos/
+[general]: https://munozbravo.github.io/banrep/uso_general/
 
 ----
 
@@ -98,5 +98,3 @@ Puede verificar si [banrep][pypi_banrep] instaló correctamente usando `python` 
 Si no aparece ningún error quiere decir que la instalación fue exitosa.
 
 ----
-
-### TODO: sentimiento

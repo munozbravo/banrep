@@ -10,7 +10,7 @@ nav:
     - Instalación: 'instalacion.md'
     - Modo de Uso:
         - 'uso_extraccion.md'
-        - 'uso_topicos.md'
+        - 'uso_general.md'
     - Vínculos de interés: 'vinculos.md'
 
 markdown_extensions:
