@@ -145,6 +145,8 @@ class Registros:
         else:
             self.df = pd.read_csv(self.archivo)
 
+        self.df = self.df.dropna(subset=[self.col_texto])
+
     def __repr__(self):
         return f"Archivo {self.archivo.name} con {self.__len__()} registros."
 
