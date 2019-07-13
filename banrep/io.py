@@ -62,49 +62,6 @@ def guardar_texto(texto, archivo):
             ruta.write("\n")
 
 
-def iterar_registros(directorio, aleatorio=False, chars=0, parrafos=False):
-    """Itera rutas en directorio y extrae detalles de cada documento.
-
-    Documento puede ser el texto de un archivo o cada párrafo en él.
-
-    Parameters
-    ----------
-    directorio : str | Path
-        Directorio a iterar.
-    aleatorio : bool
-        Iterar aleatoriamente.
-    chars : int
-        Mínimo número de caracteres en una línea de texto.
-    parrafos : bool
-        Considerar cada párrafo como documento.
-
-    Yields
-    ------
-    tuple (str, dict)
-        Información de cada documento (texto, metadata).
-    """
-    doc_id = 1
-    for archivo in iterar_rutas(directorio, aleatorio=aleatorio):
-        texto = leer_texto(archivo)
-        if texto:
-            if chars:
-                texto = filtrar_cortas(texto, chars=chars)
-
-            comun = {"archivo": archivo.name, "fuente": archivo.parent.name}
-
-            if parrafos:
-                for p in texto.splitlines():
-                    if p:
-                        info = {"doc_id": f"{doc_id:0>6}", **comun}
-                        doc_id += 1
-                        yield p, info
-
-            else:
-                info = {"doc_id": f"{doc_id:0>6}", **comun}
-                doc_id += 1
-                yield texto, info
-
-
 def leer_palabras(archivo, hoja, col_grupo="type", col_palabras="word"):
     """Extrae grupos de palabras de un archivo Excel.
 
@@ -151,6 +108,102 @@ def df_crear_textos(df, col_id, col_texto, directorio):
     df.apply(lambda x: guardar_texto(x[col_texto], x["nombres"]), axis=1)
 
     return
+
+
+class Registros:
+    """Colección de textos almacenados en archivo csv o Excel."""
+
+    def __init__(self, archivo, col_texto, col_meta, chars=0, hoja=None):
+        """Itera filas de archivo y extrae detalles de cada documento.
+
+        Parameters
+        ----------
+        archivo : str | Path
+            Ruta del archivo del cual se quiere leer texto.
+        col_texto : str
+            Nombre de columna que contiene texto en sus filas.
+        col_meta : list
+            Nombre de columnas a incluir como metadata.
+        chars : int
+            Mínimo número de caracteres en una línea de texto.
+        hoja : str
+            Nombre de hoja en archivo, si excel.
+
+        Yields
+        ------
+        tuple (str, dict)
+            Información de cada documento (texto, metadata).
+        """
+        self.archivo = Path(archivo).resolve()
+        self.col_texto = col_texto
+        self.col_meta = col_meta
+        self.chars = chars
+        self.hoja = hoja
+
+        if self.hoja:
+            self.df = pd.read_excel(self.archivo, sheet_name=self.hoja)
+        else:
+            self.df = pd.read_csv(self.archivo)
+
+    def __repr__(self):
+        return f"Archivo {self.archivo.name} con {self.__len__()} registros."
+
+    def __len__(self):
+        return len(self.df.index)
+
+    def __iter__(self):
+        """Iterar devuelve texto, meta de cada archivo."""
+        for row in self.df.itertuples():
+            texto = getattr(row, self.col_texto)
+            meta = {k: getattr(row, k) for k in self.col_meta}
+
+            if self.chars:
+                texto = filtrar_cortas(texto, chars=self.chars)
+
+            yield texto, meta
+
+
+def iterar_registros(directorio, aleatorio=False, chars=0, parrafos=False):
+    """Itera rutas en directorio y extrae detalles de cada documento.
+
+    Documento puede ser el texto de un archivo o cada párrafo en él.
+
+    Parameters
+    ----------
+    directorio : str | Path
+        Directorio a iterar.
+    aleatorio : bool
+        Iterar aleatoriamente.
+    chars : int
+        Mínimo número de caracteres en una línea de texto.
+    parrafos : bool
+        Considerar cada párrafo como documento.
+
+    Yields
+    ------
+    tuple (str, dict)
+        Información de cada documento (texto, metadata).
+    """
+    doc_id = 1
+    for archivo in iterar_rutas(directorio, aleatorio=aleatorio):
+        texto = leer_texto(archivo)
+        if texto:
+            if chars:
+                texto = filtrar_cortas(texto, chars=chars)
+
+            comun = {"archivo": archivo.name, "fuente": archivo.parent.name}
+
+            if parrafos:
+                for p in texto.splitlines():
+                    if p:
+                        info = {"doc_id": f"{doc_id:0>6}", **comun}
+                        doc_id += 1
+                        yield p, info
+
+            else:
+                info = {"doc_id": f"{doc_id:0>6}", **comun}
+                doc_id += 1
+                yield texto, info
 
 
 class Textos:
