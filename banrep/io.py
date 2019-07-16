@@ -135,6 +135,8 @@ class Registros:
         self.chars = chars
         self.hoja = hoja
 
+        self.n_docs = 0
+
     def __repr__(self):
         return f"{self.__len__()} archivos en directorio {self.directorio.name}."
 
@@ -155,6 +157,7 @@ class Registros:
         tuple (str, dict)
             Información de cada registro (texto, metadata).
         """
+        self.n_docs = 0
         for archivo in iterar_rutas(self.directorio):
             if self.hoja:
                 df = pd.read_excel(archivo, sheet_name=self.hoja)
@@ -164,6 +167,7 @@ class Registros:
             df = df.dropna(subset=[self.col_texto])
 
             for row in df.itertuples():
+                self.n_docs += 1
                 texto = getattr(row, self.col_texto)
                 meta = {k: getattr(row, k) for k in self.col_meta}
 
@@ -219,6 +223,7 @@ class Textos:
         tuple (str, dict)
             Información de cada documento (texto, metadata).
         """
+        self.n_docs = 0
         for archivo in iterar_rutas(self.directorio, aleatorio=self.aleatorio):
             texto = leer_texto(archivo)
             if texto:
