@@ -111,15 +111,15 @@ def df_crear_textos(df, col_id, col_texto, directorio):
 
 
 class Registros:
-    """Colección de textos almacenados en archivo csv o Excel."""
+    """Colección de textos almacenados en archivos csv o Excel."""
 
-    def __init__(self, archivo, col_texto, col_meta, chars=0, hoja=None):
-        """Itera filas de archivo y extrae detalles de cada documento.
+    def __init__(self, directorio, col_texto, col_meta, chars=0, hoja=None):
+        """Define el directorio, columnas para texto y metadata, y tipo archivo.
 
         Parameters
         ----------
-        archivo : str | Path
-            Ruta del archivo del cual se quiere leer texto.
+        directorio : str | Path
+            Ruta del directorio que se quiere iterar.
         col_texto : str
             Nombre de columna que contiene texto en sus filas.
         col_meta : list
@@ -128,41 +128,49 @@ class Registros:
             Mínimo número de caracteres en una línea de texto.
         hoja : str
             Nombre de hoja en archivo, si excel.
-
-        Yields
-        ------
-        tuple (str, dict)
-            Información de cada documento (texto, metadata).
         """
-        self.archivo = Path(archivo).resolve()
+        self.directorio = Path(directorio).resolve()
         self.col_texto = col_texto
         self.col_meta = col_meta
         self.chars = chars
         self.hoja = hoja
 
-        if self.hoja:
-            self.df = pd.read_excel(self.archivo, sheet_name=self.hoja)
-        else:
-            self.df = pd.read_csv(self.archivo)
-
-        self.df = self.df.dropna(subset=[self.col_texto])
-
     def __repr__(self):
-        return f"Archivo {self.archivo.name} con {self.__len__()} registros."
+        return f"{self.__len__()} archivos en directorio {self.directorio.name}."
 
     def __len__(self):
-        return len(self.df.index)
+        return len(
+            list(
+                f
+                for f in self.directorio.glob("**/*")
+                if f.is_file() and not f.name.startswith(".")
+            )
+        )
 
     def __iter__(self):
-        """Iterar devuelve texto, meta de cada archivo."""
-        for row in self.df.itertuples():
-            texto = getattr(row, self.col_texto)
-            meta = {k: getattr(row, k) for k in self.col_meta}
+        """Itera archivos y extrae detalles (texto, meta) de cada registro.
 
-            if self.chars:
-                texto = filtrar_cortas(texto, chars=self.chars)
+        Yields
+        ------
+        tuple (str, dict)
+            Información de cada registro (texto, metadata).
+        """
+        for archivo in iterar_rutas(self.directorio):
+            if self.hoja:
+                df = pd.read_excel(archivo, sheet_name=self.hoja)
+            else:
+                df = pd.read_csv(archivo)
 
-            yield texto, meta
+            df = df.dropna(subset=[self.col_texto])
+
+            for row in df.itertuples():
+                texto = getattr(row, self.col_texto)
+                meta = {k: getattr(row, k) for k in self.col_meta}
+
+                if self.chars:
+                    texto = filtrar_cortas(texto, chars=self.chars)
+
+                yield texto, meta
 
 
 def iterar_registros(directorio, aleatorio=False, chars=0, parrafos=False):
