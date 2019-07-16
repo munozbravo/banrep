@@ -15,7 +15,7 @@ class MiCorpus:
     def __init__(
         self,
         lang,
-        datos=None,
+        datos,
         filtros=None,
         ngrams=None,
         id2word=None,
@@ -34,35 +34,30 @@ class MiCorpus:
         self.corta = corta
         self.no_above = no_above
 
-        self.docs = []
-        self.matcher = None
-
         self.exts_doc = ["doc_id", "archivo", "fuente", "frases", "palabras"]
         self.exts_span = []
         self.exts_token = []
 
         self.fijar_extensiones()
+        self.fijar_pipes()
 
-        self.lang.add_pipe(self.evaluar_tokens, last=True)
-        self.lang.add_pipe(self.conteos_doc, last=True)
+        self.docs = [doc for doc in self.crear_docs(datos)]
+        print(f"{self.__len__()} docs procesados...")
 
-        if self.wordlists:
-            self.lang.add_pipe(self.tokens_presentes, last=True)
+        if not self.ngrams:
+            self.ngrams = self.model_ngrams()
+            print("Modelo de n-gramas ha sido creado...")
 
-        if datos:
-            self.docs = [doc for doc in self.crear_docs(datos)]
+        if not self.id2word:
+            self.id2word = self.crear_id2word()
+            print(f"Diccionario con {len(self.id2word)} términos creado...")
+
+        self.matcher = None
+        if self.express:
             self.matcher = self.crear_matcher()
 
-            if not self.ngrams:
-                self.ngrams = self.model_ngrams()
-
-            if not self.id2word:
-                self.id2word = self.crear_id2word()
-
     def __repr__(self):
-        return (
-            f"Corpus con {len(self.docs)} docs y {len(self.id2word)} palabras únicas."
-        )
+        return f"Corpus: {self.__len__()} docs y {len(self.id2word)} términos."
 
     def __len__(self):
         return len(self.docs)
@@ -94,6 +89,19 @@ class MiCorpus:
                     Token.set_extension(tipo, default=False)
                     if tipo not in self.exts_token:
                         self.exts_token.append(tipo)
+
+    def fijar_pipes(self):
+        if not self.lang.has_pipe("evaluar_tokens"):
+            self.lang.add_pipe(self.evaluar_tokens, name="evaluar_tokens", last=True)
+
+        if not self.lang.has_pipe("conteos_doc"):
+            self.lang.add_pipe(self.conteos_doc, name="conteos_doc", last=True)
+
+        if self.wordlists:
+            if not self.lang.has_pipe("tokens_presentes"):
+                self.lang.add_pipe(
+                    self.tokens_presentes, name="tokens_presentes", last=True
+                )
 
     def evaluar_tokens(self, doc):
         """Cambia el valor de la extension cumple (Token) si falla filtros.
@@ -198,11 +206,13 @@ class MiCorpus:
         spacy.tokens.Doc
         """
         entities = []
-        for match_id, start, end in self.matcher(doc):
-            span = Span(doc, start, end, label=self.lang.vocab.strings[match_id])
-            entities.append(span)
 
-        doc.ents = entities
+        if self.express:
+            for match_id, start, end in self.matcher(doc):
+                span = Span(doc, start, end, label=self.lang.vocab.strings[match_id])
+                entities.append(span)
+
+            doc.ents = entities
 
         return doc
 
