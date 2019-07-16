@@ -173,61 +173,31 @@ class Registros:
                 yield texto, meta
 
 
-def iterar_registros(directorio, aleatorio=False, chars=0, parrafos=False):
-    """Itera rutas en directorio y extrae detalles de cada documento.
-
-    Documento puede ser el texto de un archivo o cada párrafo en él.
-
-    Parameters
-    ----------
-    directorio : str | Path
-        Directorio a iterar.
-    aleatorio : bool
-        Iterar aleatoriamente.
-    chars : int
-        Mínimo número de caracteres en una línea de texto.
-    parrafos : bool
-        Considerar cada párrafo como documento.
-
-    Yields
-    ------
-    tuple (str, dict)
-        Información de cada documento (texto, metadata).
-    """
-    doc_id = 1
-    for archivo in iterar_rutas(directorio, aleatorio=aleatorio):
-        texto = leer_texto(archivo)
-        if texto:
-            if chars:
-                texto = filtrar_cortas(texto, chars=chars)
-
-            comun = {"archivo": archivo.name, "fuente": archivo.parent.name}
-
-            if parrafos:
-                for p in texto.splitlines():
-                    if p:
-                        info = {"doc_id": f"{doc_id:0>6}", **comun}
-                        doc_id += 1
-                        yield p, info
-
-            else:
-                info = {"doc_id": f"{doc_id:0>6}", **comun}
-                doc_id += 1
-                yield texto, info
-
-
 class Textos:
-    """Colección de textos almacenados en un directorio.
-
-    Itera rutas en directorio, opcionalmente aleatoriamente, y extrae texto y metadata de cada archivo.
-    Iteración puede ser el texto de un archivo o cada párrafo en él, filtrando líneas según longitud.
-    """
+    """Colección de textos almacenados en archivos planos en directorio."""
 
     def __init__(self, directorio, aleatorio=False, chars=0, parrafos=False):
+        """Define el directorio, iteración, y filtro de longitud de líneas.
+
+        Iteración puede ser el texto de un archivo o cada párrafo en él, filtrando líneas según longitud.
+
+        Parameters
+        ----------
+        directorio : str | Path
+            Directorio a iterar.
+        aleatorio : bool
+            Iterar aleatoriamente.
+        chars : int
+            Mínimo número de caracteres en una línea de texto.
+        parrafos : bool
+            Considerar cada párrafo como documento.
+        """
         self.directorio = Path(directorio).resolve()
         self.aleatorio = aleatorio
         self.chars = chars
         self.parrafos = parrafos
+
+        self.n_docs = 0
 
     def __repr__(self):
         return f"{self.__len__()} archivos en directorio {self.directorio.name}."
@@ -242,11 +212,31 @@ class Textos:
         )
 
     def __iter__(self):
-        """Iterar devuelve texto, meta de cada archivo."""
-        for texto, meta in iterar_registros(
-            self.directorio,
-            aleatorio=self.aleatorio,
-            chars=self.chars,
-            parrafos=self.parrafos,
-        ):
-            yield texto, meta
+        """Itera archivos y extrae detalles (texto, meta) de cada archivo.
+
+        Yields
+        ------
+        tuple (str, dict)
+            Información de cada documento (texto, metadata).
+        """
+        for archivo in iterar_rutas(self.directorio, aleatorio=self.aleatorio):
+            texto = leer_texto(archivo)
+            if texto:
+                if self.chars:
+                    texto = filtrar_cortas(texto, chars=self.chars)
+
+                comun = {"archivo": archivo.name, "fuente": archivo.parent.name}
+
+                if self.parrafos:
+                    for p in texto.splitlines():
+                        if p:
+                            self.n_docs += 1
+                            info = {"doc_id": f"{self.n_docs:0>6}", **comun}
+
+                            yield p, info
+
+                else:
+                    self.n_docs += 1
+                    meta = {"doc_id": f"{self.n_docs:0>6}", **comun}
+
+                    yield texto, meta
