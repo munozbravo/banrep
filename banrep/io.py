@@ -113,7 +113,16 @@ def df_crear_textos(df, col_id, col_texto, directorio):
 class Registros:
     """Colección de textos almacenados en archivos csv o Excel."""
 
-    def __init__(self, directorio, col_texto, col_meta, chars=0, hoja=None):
+    def __init__(
+        self,
+        directorio,
+        col_texto,
+        col_meta,
+        chars=0,
+        hoja=None,
+        recursivo=False,
+        exts=None,
+    ):
         """Define el directorio, columnas para texto y metadata, y tipo archivo.
 
         Parameters
@@ -128,12 +137,18 @@ class Registros:
             Mínimo número de caracteres en una línea de texto.
         hoja : str
             Nombre de hoja en archivo, si excel.
+        recursivo: bool
+            Iterar recursivamente.
+        exts: Iterable
+            Solo considerar estas extensiones.
         """
         self.directorio = Path(directorio).resolve()
         self.col_texto = col_texto
         self.col_meta = col_meta
         self.chars = chars
         self.hoja = hoja
+        self.recursivo = recursivo
+        self.exts = exts
 
         self.n_docs = 0
 
@@ -143,9 +158,12 @@ class Registros:
     def __len__(self):
         return len(
             list(
-                f
-                for f in self.directorio.glob("**/*")
-                if f.is_file() and not f.name.startswith(".")
+                iterar_rutas(
+                    self.directorio,
+                    aleatorio=self.aleatorio,
+                    recursivo=self.recursivo,
+                    exts=self.exts,
+                )
             )
         )
 
@@ -158,7 +176,13 @@ class Registros:
             Información de cada registro (texto, metadata).
         """
         self.n_docs = 0
-        for archivo in iterar_rutas(self.directorio):
+
+        for archivo in iterar_rutas(
+            self.directorio,
+            aleatorio=self.aleatorio,
+            recursivo=self.recursivo,
+            exts=self.exts,
+        ):
             if self.hoja:
                 df = pd.read_excel(archivo, sheet_name=self.hoja)
             else:
@@ -180,10 +204,18 @@ class Registros:
 class Textos:
     """Colección de textos almacenados en archivos planos en directorio."""
 
-    def __init__(self, directorio, aleatorio=False, chars=0, parrafos=False):
+    def __init__(
+        self,
+        directorio,
+        aleatorio=False,
+        chars=0,
+        parrafos=False,
+        recursivo=False,
+        exts=None,
+    ):
         """Define el directorio, iteración, y filtro de longitud de líneas.
 
-        Iteración puede ser el texto de un archivo o cada párrafo en él, filtrando líneas según longitud.
+        Iteración puede ser el texto de un archivo o cada párrafo en él, filtrando líneas según longitud, recursivo o no, limitando extensiones.
 
         Parameters
         ----------
@@ -195,11 +227,17 @@ class Textos:
             Mínimo número de caracteres en una línea de texto.
         parrafos : bool
             Considerar cada párrafo como documento.
+        recursivo: bool
+            Iterar recursivamente.
+        exts: Iterable
+            Solo considerar estas extensiones.
         """
         self.directorio = Path(directorio).resolve()
         self.aleatorio = aleatorio
         self.chars = chars
         self.parrafos = parrafos
+        self.recursivo = recursivo
+        self.exts = exts
 
         self.n_docs = 0
 
@@ -209,9 +247,12 @@ class Textos:
     def __len__(self):
         return len(
             list(
-                f
-                for f in self.directorio.glob("**/*")
-                if f.is_file() and not f.name.startswith(".")
+                iterar_rutas(
+                    self.directorio,
+                    aleatorio=self.aleatorio,
+                    recursivo=self.recursivo,
+                    exts=self.exts,
+                )
             )
         )
 
@@ -224,7 +265,13 @@ class Textos:
             Información de cada documento (texto, metadata).
         """
         self.n_docs = 0
-        for archivo in iterar_rutas(self.directorio, aleatorio=self.aleatorio):
+
+        for archivo in iterar_rutas(
+            self.directorio,
+            aleatorio=self.aleatorio,
+            recursivo=self.recursivo,
+            exts=self.exts,
+        ):
             texto = leer_texto(archivo)
             if texto:
                 if self.chars:

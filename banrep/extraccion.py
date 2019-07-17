@@ -40,7 +40,7 @@ def extraer_info(archivo):
     return texto, metadata
 
 
-def extraer_archivos(dir_docs, dir_textos):
+def extraer_archivos(dir_docs, dir_textos, recursivo=False, exts=None):
     """Extrae y guarda texto de cada archivo en directorio si no existe.
 
     Parameters
@@ -49,6 +49,10 @@ def extraer_archivos(dir_docs, dir_textos):
         Directorio donde están los documentos originales.
     dir_textos : str | Path
         Directorio donde se quiere guardar texto extraído.
+    recursivo: bool
+        Iterar recursivamente.
+    exts: Iterable
+        Solo considerar estas extensiones.
 
     Returns
     ---------
@@ -59,7 +63,7 @@ def extraer_archivos(dir_docs, dir_textos):
     dirtextos = crear_directorio(dir_textos)
 
     n = 0
-    for ruta in iterar_rutas(dirdocs):
+    for ruta in iterar_rutas(dirdocs, recursivo=recursivo, exts=exts):
         archivo = dirtextos.joinpath(f"{ruta.stem}.txt")
         if not archivo.exists():
             texto, metadata = extraer_info(ruta)

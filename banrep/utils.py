@@ -27,8 +27,10 @@ def crear_directorio(nombre):
     return ruta
 
 
-def iterar_rutas(directorio, aleatorio=False):
-    """Itera rutas de archivos en directorio (recursivo), en orden o aleatorio.
+def iterar_rutas(directorio, aleatorio=False, recursivo=False, exts=None):
+    """Itera rutas de archivos en directorio.
+
+    Puede ser o no recursivo, en orden o aleatorio, limitando extensiones.
 
     Parameters
     ----------
@@ -36,6 +38,10 @@ def iterar_rutas(directorio, aleatorio=False):
         Directorio a iterar.
     aleatorio : bool
         Iterar aleatoriamente.
+    recursivo: bool
+        Iterar recursivamente.
+    exts: Iterable
+        Solo considerar estas extensiones.
 
     Yields
     ------
@@ -43,11 +49,16 @@ def iterar_rutas(directorio, aleatorio=False):
         Ruta de archivo.
     """
     absoluto = Path(directorio).resolve()
-    rutas = (
-        ruta
-        for ruta in absoluto.glob("**/*")
-        if ruta.is_file() and not ruta.name.startswith(".")
-    )
+
+    if recursivo:
+        rutas = (r for r in absoluto.glob("**/*"))
+    else:
+        rutas = (r for r in absoluto.iterdir())
+
+    rutas = (r for r in rutas if r.is_file() and not r.name.startswith("."))
+
+    if exts:
+        rutas = (r for r in rutas if r.suffix in exts)
 
     todas = sorted(rutas)
     if aleatorio:
