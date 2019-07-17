@@ -160,7 +160,6 @@ class Registros:
             list(
                 iterar_rutas(
                     self.directorio,
-                    aleatorio=self.aleatorio,
                     recursivo=self.recursivo,
                     exts=self.exts,
                 )
@@ -179,7 +178,6 @@ class Registros:
 
         for archivo in iterar_rutas(
             self.directorio,
-            aleatorio=self.aleatorio,
             recursivo=self.recursivo,
             exts=self.exts,
         ):
