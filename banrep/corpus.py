@@ -324,7 +324,7 @@ class MiCorpus:
         token : spacy.tokens.Token
             Token a evaluar.
         filtros : dict, optional
-            (is_alpha, stopwords, postags, entities)
+            (is_alpha, stopwords, postags, entities, chars)
 
         Returns
         -------
@@ -337,12 +337,14 @@ class MiCorpus:
         stopwords = filtros.get("stopwords")
         postags = filtros.get("postags")
         entities = filtros.get("entities")
+        chars = filtros.get("chars", 0)
 
         cumple = (
             (True if not filtros.get("is_alpha") else token.is_alpha)
             and (True if not stopwords else token.lower_ not in stopwords)
             and (True if not postags else token.pos_ not in postags)
             and (True if not entities else token.ent_type_ not in entities)
+            and (len(token) > chars)
         )
 
         return cumple
