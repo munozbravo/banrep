@@ -85,7 +85,7 @@ def leer_palabras(archivo, hoja, col_grupo="type", col_palabras="word"):
     return grupos
 
 
-def df_crear_textos(df, col_id, col_texto, directorio):
+def df_crear_textos(df, col_id, textcol, directorio):
     """Crea archivo de texto en directorio para cada record de dataframe.
 
     Parameters
@@ -94,7 +94,7 @@ def df_crear_textos(df, col_id, col_texto, directorio):
         En alguna de sus columnas tiene texto en cada fila.
     col_id : str
         Nombre de columna con valores únicos para usar en nombre archivo.
-    col_texto: str
+    textcol: str
         Nombre de columna que contiene texto en sus filas.
     directorio: str | Path
         Directorio en donde se quiere guardar los archivos de texto.
@@ -105,7 +105,7 @@ def df_crear_textos(df, col_id, col_texto, directorio):
     """
     salida = Path(directorio).resolve()
     df["nombres"] = df[col_id].apply(lambda x: salida.joinpath(f"{x}.txt"))
-    df.apply(lambda x: guardar_texto(x[col_texto], x["nombres"]), axis=1)
+    df.apply(lambda x: guardar_texto(x[textcol], x["nombres"]), axis=1)
 
     return
 
@@ -116,8 +116,8 @@ class Registros:
     def __init__(
         self,
         directorio,
-        col_texto,
-        col_meta,
+        textcol,
+        metacols,
         chars=0,
         hoja=None,
         recursivo=False,
@@ -129,9 +129,9 @@ class Registros:
         ----------
         directorio : str | Path
             Ruta del directorio que se quiere iterar.
-        col_texto : str
+        textcol : str
             Nombre de columna que contiene texto en sus filas.
-        col_meta : list
+        metacols : list
             Nombre de columnas a incluir como metadata.
         chars : int
             Mínimo número de caracteres en una línea de texto.
@@ -143,8 +143,8 @@ class Registros:
             Solo considerar estas extensiones.
         """
         self.directorio = Path(directorio).resolve()
-        self.col_texto = col_texto
-        self.col_meta = col_meta
+        self.textcol = textcol
+        self.metacols = metacols
         self.chars = chars
         self.hoja = hoja
         self.recursivo = recursivo
@@ -186,12 +186,12 @@ class Registros:
             else:
                 df = pd.read_csv(archivo)
 
-            df = df.dropna(subset=[self.col_texto])
+            df = df.dropna(subset=[self.textcol])
 
             for row in df.itertuples():
                 self.n_docs += 1
-                texto = getattr(row, self.col_texto)
-                meta = {k: getattr(row, k) for k in self.col_meta}
+                texto = getattr(row, self.textcol)
+                meta = {k: getattr(row, k) for k in self.metacols}
 
                 if self.chars:
                     texto = filtrar_cortas(texto, chars=self.chars)
