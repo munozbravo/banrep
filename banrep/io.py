@@ -110,6 +110,57 @@ def df_crear_textos(df, col_id, textcol, directorio):
     return
 
 
+class Datos:
+    """Colección de textos en DataFrame."""
+
+    def __init__(self, df, textcol, metacols, chars=0):
+        """Define parametros.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame que contiene los textos.
+        textcol : str
+            Nombre de columna que contiene texto en sus filas.
+        metacols : list
+            Nombre de columnas a incluir como metadata.
+        chars : int
+            Mínimo número de caracteres en una línea de texto.
+        """
+        self.df = df
+        self.textcol = textcol
+        self.metacols = metacols
+        self.chars = chars
+
+        self.n_docs = 0
+
+    def __repr__(self):
+        return f"{self.__len__()} registros en DataFrame, {self.n_docs} procesados."
+
+    def __len__(self):
+        return len(self.df.index)
+
+    def __iter__(self):
+        """Itera registros de DataFrame y extrae detalles (texto, meta).
+
+        Yields
+        ------
+        tuple (str, dict)
+            Información de cada registro (texto, metadata).
+        """
+        self.n_docs = 0
+
+        for row in self.df.itertuples():
+            self.n_docs += 1
+            texto = getattr(row, self.textcol)
+            meta = {k: getattr(row, k) for k in self.metacols}
+
+            if self.chars:
+                texto = filtrar_cortas(texto, chars=self.chars)
+
+            yield texto, meta
+
+
 class Registros:
     """Colección de textos almacenados en archivos csv o Excel."""
 
@@ -158,11 +209,7 @@ class Registros:
     def __len__(self):
         return len(
             list(
-                iterar_rutas(
-                    self.directorio,
-                    recursivo=self.recursivo,
-                    exts=self.exts,
-                )
+                iterar_rutas(self.directorio, recursivo=self.recursivo, exts=self.exts)
             )
         )
 
@@ -177,9 +224,7 @@ class Registros:
         self.n_docs = 0
 
         for archivo in iterar_rutas(
-            self.directorio,
-            recursivo=self.recursivo,
-            exts=self.exts,
+            self.directorio, recursivo=self.recursivo, exts=self.exts
         ):
             if self.hoja:
                 df = pd.read_excel(archivo, sheet_name=self.hoja)
