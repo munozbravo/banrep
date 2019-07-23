@@ -34,7 +34,7 @@ class MiCorpus:
         self.corta = corta
         self.no_above = no_above
 
-        self.exts_doc = ["doc_id", "archivo", "fuente", "frases", "palabras"]
+        self.exts_doc = []
         self.exts_span = []
         self.exts_token = []
 
@@ -69,10 +69,6 @@ class MiCorpus:
 
     def fijar_extensiones(self):
         """Fijar extensiones globalmente."""
-        for ext in self.exts_doc:
-            if not Doc.has_extension(ext):
-                Doc.set_extension(ext, default=None)
-
         if not Span.has_extension("ok_span"):
             Span.set_extension("ok_span", getter=lambda x: len(x) > self.corta)
             if "ok_span" not in self.exts_span:
@@ -94,9 +90,6 @@ class MiCorpus:
         if not self.lang.has_pipe("evaluar_tokens"):
             self.lang.add_pipe(self.evaluar_tokens, name="evaluar_tokens", last=True)
 
-        if not self.lang.has_pipe("conteos_doc"):
-            self.lang.add_pipe(self.conteos_doc, name="conteos_doc", last=True)
-
         if self.wordlists:
             if not self.lang.has_pipe("tokens_presentes"):
                 self.lang.add_pipe(
@@ -117,29 +110,6 @@ class MiCorpus:
         for token in doc:
             if not self.token_cumple(token, filtros=self.filtros):
                 token._.set("ok_token", False)
-
-        return doc
-
-    def conteos_doc(self, doc):
-        """Fija valor de extensiones que cuentan frases y palabras que cumplen.
-
-        Parameters
-        ----------
-        doc : spacy.tokens.Doc
-
-        Returns
-        -------
-        doc : spacy.tokens.Doc
-        """
-        frases = 0
-        palabras = 0
-        for sent in doc.sents:
-            if sent._.get("ok_span"):
-                frases += 1
-                palabras += len([tok for tok in sent if tok._.get("ok_token")])
-
-        doc._.set("frases", frases)
-        doc._.set("palabras", palabras)
 
         return doc
 
@@ -177,7 +147,11 @@ class MiCorpus:
         spacy.tokens.Doc
         """
         for doc, meta in self.lang.pipe(datos, as_tuples=True):
-            for ext in self.exts_doc:
+            for ext in meta.keys():
+                if not Doc.has_extension(ext):
+                    Doc.set_extension(ext, default=None)
+                    if ext not in self.exts_doc:
+                        self.exts_doc.append(ext)
                 if meta.get(ext):
                     doc._.set(ext, meta.get(ext))
 
@@ -339,13 +313,15 @@ class MiCorpus:
         entities = filtros.get("entities")
         chars = filtros.get("chars", 0)
 
-        cumple = (
-            (True if not filtros.get("is_alpha") else token.is_alpha)
-            and (True if not stopwords else token.lower_ not in stopwords)
-            and (True if not postags else token.pos_ not in postags)
-            and (True if not entities else token.ent_type_ not in entities)
-            and (len(token) > chars)
-        )
+        cumple = True if not filtros.get("is_alpha") else token.is_alpha
+        if cumple:
+            cumple = len(token) > chars
+        if cumple:
+            cumple = True if not stopwords else token.lower_ not in stopwords
+        if cumple:
+            cumple = True if not postags else token.pos_ not in postags
+        if cumple:
+            cumple = True if not entities else token.ent_type_ not in entities
 
         return cumple
 
@@ -357,11 +333,27 @@ class MiCorpus:
         pd.DataFrame
             Estadísticas de cada documento del corpus.
         """
+        cols = self.exts_doc + self.exts_span + self.exts_token
+        if self.express:
+            tipos = list(self.express.keys())
+            cols = cols + tipos
+
         data = []
         for doc in self.docs:
-            data.append([doc._.get(ext) for ext in self.exts_doc])
+            fila = [doc._.get(ext) for ext in self.exts_doc]
+            for ext in self.exts_span:
+                fila.append(sum(sent._.get(ext) for sent in doc.sents))
+            for ext in self.exts_token:
+                fila.append(sum(tok._.get(ext) for tok in doc))
 
-        return pd.DataFrame(data=data, columns=self.exts_doc)
+            if self.express:
+                doc = self.cambiar_entities(doc)
+                for tipo in tipos:
+                    fila.append(any(ent.label_ == tipo for ent in doc.ents))
+
+            data.append(fila)
+
+        return pd.DataFrame(data=data, columns=cols)
 
     def corpus_tokens(self):
         """Tokens del corpus.
