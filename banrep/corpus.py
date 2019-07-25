@@ -444,3 +444,108 @@ class MiCorpus:
                 sent_id += 1
 
         return pd.DataFrame(items, columns=columnas)
+
+
+class Expresiones:
+    """Expresiones (Entities) en lenguaje."""
+
+    def __init__(self, lang, express):
+        """Define parámetros.
+
+        Parameters
+        ----------
+        lang : spacy.language.Language
+            Modelo de lenguaje spaCy.
+        express : dict (str: set)
+            Grupos de palabras o expresiones.
+        """
+        self.lang = lang
+        self.express = express
+
+        self.tipos = list(express.keys())
+        self.matcher = self.crear_matcher()
+
+    def __repr__(self):
+        fstr = ""
+        for tipo in self.tipos:
+            f = f"{len(self.express.get(tipo))} expresiones en grupo {tipo}."
+            fstr += f"{f}\n"
+        return fstr
+
+    def crear_matcher(self):
+        """Crea PhraseMatcher para encontrar expresiones en documentos."""
+        matcher = PhraseMatcher(self.lang.vocab)
+        for tipo in self.tipos:
+            patterns = list(self.lang.pipe(self.express.get(tipo)))
+            matcher.add(tipo, None, *patterns)
+
+        return matcher
+
+    def cambiar_entities(self, doc):
+        """Reemplaza entities en doc basado en expresiones identificadas.
+
+        Parameters
+        ----------
+        doc : spacy.tokens.Doc
+
+        Returns
+        -------
+        spacy.tokens.Doc
+        """
+        entities = []
+
+        for match_id, start, end in self.matcher(doc):
+            span = Span(doc, start, end, label=self.lang.vocab.strings[match_id])
+            entities.append(span)
+
+        doc.ents = entities
+
+        return doc
+
+
+class PreCorpus:
+    """Colección de documentos en DataFrame."""
+
+    def __init__(self, lang, df, textcol, expresiones):
+        """Define parámetros.
+
+        Parameters
+        ----------
+        lang : spacy.language.Language
+            Modelo de lenguaje spaCy.
+        df : pd.DataFrame
+            DataFrame contiene alguna columna con texto por fila.
+        textcol: str
+            Nombre de columna que contiene texto en sus filas.
+        expresiones : banrep.corpus.Expresiones
+            Grupos de palabras o expresiones consideradas Entities.
+        """
+        self.lang = lang
+        self.df = df
+        self.textcol = textcol
+        self.expresiones = expresiones
+
+        self.iniciales = len(self.df.index)
+        self.cols = list(self.df.columns)
+
+        self.filtrar()
+
+    def __repr__(self):
+        return f"{self.__len__()} registros de {self.iniciales} iniciales."
+
+    def __len__(self):
+        return len(self.df.index)
+
+    def filtrar(self):
+        self.df = self.df.dropna(subset=[self.textcol])
+        self.df.loc[:, "docs"] = self.df[self.textcol].apply(
+            lambda x: self.expresiones.cambiar_entities(self.lang(x))
+        )
+
+        for tipo in self.expresiones.tipos:
+            self.df.loc[:, tipo] = self.df["docs"].apply(
+                lambda x: any(ent.label_ == tipo for ent in x.ents)
+            )
+
+        self.df = self.df[self.df.loc[:, self.expresiones.tipos].all(axis=1)]
+        self.df = self.df.loc[:, self.cols]
