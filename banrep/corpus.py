@@ -20,17 +20,40 @@ class MiCorpus:
         ngrams=None,
         id2word=None,
         wordlists=None,
-        express=None,
+        expresiones=None,
         corta=0,
         no_above=0.75,
     ):
+        """Define parámetros.
+
+        Parameters
+        ----------
+        lang : spacy.language.Language
+            Modelo de lenguaje spaCy.
+        datos : Iterable (str, dict)
+            Información de cada documento (texto, metadata).
+        filtros : dict, optional
+            Filtros a evaluar en cada token.
+        ngrams : dict, optional (gensim.models.phrases.Phraser)
+            Modelos de n-gramas (bigrams, trigrams).
+        id2word : gensim.corpora.Dictionary, optional
+            Diccionario de tokens a considerar.
+        wordlists : dict (str: set)
+            Listas de palabras a identificar.
+        expresiones : banrep.corpus.Expresiones
+            Grupos de palabras o expresiones consideradas Entities.
+        corta : int, optional
+            Frases hasta este número de tokens ignoradas.
+        no_above : float, optional
+            Mantener tokens que no estén en más de esta fracción de docs.
+        """
         self.lang = lang
         self.datos = datos
         self.filtros = filtros
         self.ngrams = ngrams
         self.id2word = id2word
         self.wordlists = wordlists
-        self.express = express
+        self.expresiones = expresiones
         self.corta = corta
         self.no_above = no_above
 
@@ -51,10 +74,6 @@ class MiCorpus:
         if not self.id2word:
             self.id2word = self.crear_id2word()
             print(f"Diccionario con {len(self.id2word)} términos creado...")
-
-        self.matcher = None
-        if self.express:
-            self.matcher = self.crear_matcher()
 
     def __repr__(self):
         return f"Corpus: {self.__len__()} docs y {len(self.id2word)} términos."
@@ -156,39 +175,6 @@ class MiCorpus:
                     doc._.set(ext, meta.get(ext))
 
             yield doc
-
-    def crear_matcher(self):
-        """Crea PhraseMatcher para encontrar expresiones en documentos."""
-        matcher = PhraseMatcher(self.lang.vocab)
-
-        if self.express:
-            for tipo in self.express:
-                patterns = list(self.lang.pipe(self.express.get(tipo)))
-                matcher.add(tipo, None, *patterns)
-
-        return matcher
-
-    def cambiar_entities(self, doc):
-        """Reemplaza entities en doc basado en expresiones identificadas.
-
-        Parameters
-        ----------
-        doc : spacy.tokens.Doc
-
-        Returns
-        -------
-        spacy.tokens.Doc
-        """
-        entities = []
-
-        if self.express:
-            for match_id, start, end in self.matcher(doc):
-                span = Span(doc, start, end, label=self.lang.vocab.strings[match_id])
-                entities.append(span)
-
-            doc.ents = entities
-
-        return doc
 
     @staticmethod
     def frases_doc(doc):
@@ -334,9 +320,8 @@ class MiCorpus:
             Estadísticas de cada documento del corpus.
         """
         cols = self.exts_doc + self.exts_span + self.exts_token
-        if self.express:
-            tipos = list(self.express.keys())
-            cols = cols + tipos
+        if self.expresiones:
+            cols = cols + self.expresiones.tipos
 
         data = []
         for doc in self.docs:
@@ -346,9 +331,9 @@ class MiCorpus:
             for ext in self.exts_token:
                 fila.append(sum(tok._.get(ext) for tok in doc))
 
-            if self.express:
-                doc = self.cambiar_entities(doc)
-                for tipo in tipos:
+            if self.expresiones:
+                doc = self.expresiones.cambiar_entities(doc)
+                for tipo in self.expresiones.tipos:
                     fila.append(any(ent.label_ == tipo for ent in doc.ents))
 
             data.append(fila)
@@ -420,14 +405,13 @@ class MiCorpus:
         """
         cols = ["doc_id", "sent_id", "frase"]
         columnas = cols + self.exts_span + self.exts_token
-        if self.express:
-            tipos = list(self.express.keys())
-            columnas = columnas + tipos
+        if self.expresiones:
+            columnas = columnas + self.expresiones.tipos
 
         items = []
         for doc in self.docs:
-            if self.express:
-                doc = self.cambiar_entities(doc)
+            if self.expresiones:
+                doc = self.expresiones.cambiar_entities(doc)
             sent_id = 1
             for sent in doc.sents:
                 fila = [doc._.get("doc_id"), sent_id, sent.text]
@@ -436,8 +420,8 @@ class MiCorpus:
                 for ext in self.exts_token:
                     fila.append(sum(tok._.get(ext) for tok in sent))
 
-                if self.express:
-                    for tipo in tipos:
+                if self.expresiones:
+                    for tipo in self.expresiones.tipos:
                         fila.append(any(ent.label_ == tipo for ent in sent.ents))
 
                 items.append(fila)
