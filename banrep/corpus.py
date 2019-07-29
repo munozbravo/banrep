@@ -194,7 +194,7 @@ class Documentos:
 
             yield doc
 
-    def df_docinfo(self, texto=False):
+    def df_docs(self, texto=False):
         """Estadísticas de los Documentos.
 
         Returns
