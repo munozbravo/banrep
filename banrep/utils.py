@@ -1,8 +1,10 @@
 # coding: utf-8
-"""Módulo para funciones de interacción con el sistema."""
+"""Módulo para funciones de interacción con el sistema y diagnóstico."""
+from collections import Counter
 from pathlib import Path
 import random
 
+import pandas as pd
 
 def crear_directorio(nombre):
     """Crea nuevo directorio si no existe.
@@ -65,3 +67,22 @@ def iterar_rutas(directorio, aleatorio=False, recursivo=False, exts=None):
         random.shuffle(todas)
 
     yield from todas
+
+
+def verificar_oov(doc):
+    """Encuentra tokens fuera de vocabulario (OOV) en un documento procesado.
+
+    Parameters
+    ----------
+    doc: spacy.tokens.Doc
+
+    Returns
+    -------
+    pd.DataFrame
+        Tokens oov en frecuencia decreciente.
+    """
+    c = Counter(tok.text for tok in doc if tok.is_oov).items()
+    df = pd.DataFrame(c, columns=["token", "freq"])
+    df = df.sort_values(by="freq", ascending=False).reset_index(drop=True)
+
+    return df
