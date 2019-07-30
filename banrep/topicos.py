@@ -7,15 +7,15 @@ from gensim.models.ldamodel import LdaModel
 import pandas as pd
 
 
-class Topicos:
-    """Modelos de tópicos."""
+class Ldas:
+    """Modelos LDA de tópicos."""
 
-    def __init__(self, corpus, kas, params, medida="c_v"):
+    def __init__(self, bow, kas, params, medida="c_v"):
         """Inicializa clase.
 
         Parameters
         ----------
-        corpus : banrep.corpus.MiCorpus
+        bow : banrep.corpus.Bow
             Corpus previamente inicializado con documentos.
         kas: list (int)
             Diferentes k tópicos para los cuales crear modelo.
@@ -24,136 +24,126 @@ class Topicos:
         medida : str
             Medida de Coherencia a usar (u_mass, c_v, c_uci, c_npmi).
         """
-        self.corpus = corpus
+        self.bow = bow
         self.kas = kas
         self.params = params
         self.medida = medida
 
-        self.modelos = [lda for lda in self.crear_ldas()]
-        self.scores = [score for score in self.calcular_coherencias()]
-
-        self.max_ch = max(self.scores)
-        self.max_i = self.scores.index(self.max_ch)
-        self.top_k = self.kas[self.max_i]
+        self.modelos = sorted(
+            [lda for lda in self.modelar()], key=lambda x: x.get("score"), reverse=True
+        )
 
     def __repr__(self):
-        return f"Modelos LDA para valores k en {self.kas}: mejor k={self.top_k} (Coherence={self.max_ch:.4f})"
+        best = self.modelos[0]
+        fmstr = f"Mejor k={best.get('k')} con Score={best.get('score'):.3f}"
+        return f"Modelos LDA para k en {self.kas}: {fmstr}"
 
     def __iter__(self):
         """Iterar devuelve cada modelo en orden de kas."""
         yield from self.modelos
 
-    def crear_ldas(self):
-        """Crea modelos LDA para diferente número de tópicos.
+    def crear_modelo(self, k):
+        """Crea modelo LDA de k tópicos.
 
-        Yields
-        ------
+        Returns
+        -------
         gensim.models.ldamodel.LdaModel
-            Modelo LDA para un número de tópicos.
+            Modelo LDA de k tópicos.
         """
-        for k in self.kas:
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-                yield LdaModel(
-                    self.corpus,
-                    num_topics=k,
-                    id2word=self.corpus.id2word,
-                    **self.params,
-                )
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            modelo = LdaModel(
+                self.bow, num_topics=k, id2word=self.bow.id2word, **self.params
+            )
 
-    def calcular_coherencias(self):
-        """Calcula Coherence Score de modelos de tópicos.
+        return modelo
 
-        Yields
-        ------
+    def evaluar_modelo(self, modelo, textos):
+        """Calcula Coherence Score de modelo de tópicos.
+
+        Parameters
+        ----------
+        modelo : gensim.models.ldamodel.LdaModel
+        textos : Iterable (list[str])
+            Palabras de cada documento en un corpus.
+
+        Returns
+        -------
         float
             Coherencia calculada.
         """
-        textos = [palabras for palabras in self.corpus.obtener_palabras()]
-        for modelo in self.modelos:
-            cm = CoherenceModel(
-                model=modelo,
-                texts=textos,
-                dictionary=self.corpus.id2word,
-                coherence=self.medida,
-            )
+        cm = CoherenceModel(
+            model=modelo,
+            texts=textos,
+            dictionary=self.bow.id2word,
+            coherence=self.medida,
+        )
 
-            yield cm.get_coherence()
+        return cm.get_coherence()
 
-    def mejor_modelo(self):
-        """Devuelve el mejor modelo según Coherence Score.
+    def modelar(self):
+        """Crea y evalua modelos LDA para diferente número de tópicos.
 
-        Returns
-        -------
-        gensim.models.ldamodel.LdaModel
-            Mejor modelo LDA según Coherence Score.
+        Yields
+        ------
+        dict (k:int, modelo: gensim.models.ldamodel.LdaModel, score: float)
         """
-        return self.modelos[self.max_i]
+        textos = [palabras for palabras in self.bow.obtener_palabras()]
+        for k in self.kas:
+            modelo = self.crear_modelo(k)
+            score = self.evaluar_modelo(modelo, textos)
 
-    def doc_topico(self, modelo):
-        """Distribución de probabilidad de tópicos en cada documento.
+            yield dict(k=k, modelo=modelo, score=score)
+
+
+class Topicos:
+    """Topicos resultantes de modelo LDA"""
+
+    def __init__(self, modelo, bow):
+        """Inicialización de instancias.
 
         Parameters
         ----------
         modelo : gensim.models.ldamodel.LdaModel
-            Modelo LDA entrenado.
+        bow : banrep.corpus.Bow
+            Corpus bow previamente inicializado con documentos.
+        """
+        self.modelo = modelo
+        self.bow = bow
+
+        self.dfm = self.doc_topico()
+
+    def doc_topico(self):
+        """Distribución de probabilidad de tópicos en cada documento.
 
         Returns
         -------
         pd.DataFrame
             Distribución de probabilidad de tópicos x documento.
         """
-        data = (dict(doc) for doc in modelo[self.corpus])
-        index = [doc._.get("doc_id") for doc in self.corpus.docs]
+        data = (dict(doc) for doc in self.modelo[self.bow])
+        index = [doc._.get("doc_id") for doc in self.bow.docs]
 
         return pd.DataFrame(data=data, index=index)
 
-    def stats_topicos(self, modelo):
-        """Distribución de probabilidad de tópicos y prevalencia en corpus.
-
-        Parameters
-        ----------
-        modelo : gensim.models.ldamodel.LdaModel
-            Modelo LDA entrenado.
+    def prevalencia(self):
+        """Prevalencia de cada tópico en corpus.
 
         Returns
         -------
-        tuple (pd.DataFrame, pd.Series)
-            Distribución de probabilidad de tópicos y su Prevalencia.
-        """
-        dtm = self.doc_topico(modelo)
-        dom = self._dominante(dtm)
-
-        return dtm, dom
-
-    @staticmethod
-    def _dominante(df):
-        """Participación de tópicos como dominante en documentos.
-
-        Parameters
-        ----------
         pd.DataFrame
-            Distribución de probabilidad de tópicos x documento.
-
-        Returns
-        -------
-        pd.Series
-            Participación de cada tópico como dominante.
+            Prevalencia de tópicos.
         """
-        absolutos = df.idxmax(axis=1).value_counts()
-        relativos = round(absolutos / absolutos.sum(), 3)
-        relativos.index.name = "topico"
+        dom = self.dfm.idxmax(axis=1).value_counts(normalize=True)
+        dom.index.name = "topico"
 
-        return relativos
+        return dom.to_frame(name='domina').reset_index()
 
-    @staticmethod
-    def palabras_probables(modelo, n=15):
+    def palabras_probables(self, n=15):
         """Distribución de probabilidad de palabras en tópicos.
 
         Parameters
         ----------
-        modelo : gensim.models.ldamodel.LdaModel
-            Modelo LDA entrenado.
         n : int
             Cuantas palabras obtener.
 
@@ -163,11 +153,25 @@ class Topicos:
             Palabras probables de cada tópico y sus probabilidades.
         """
         dfs = []
-        for topico in range(modelo.num_topics):
-            data = modelo.show_topic(topico, n)
+        for topico in range(self.modelo.num_topics):
+            data = self.modelo.show_topic(topico, n)
             df = pd.DataFrame(data=data, columns=["palabra", "probabilidad"])
             df = df.sort_values(by="probabilidad", ascending=False)
             df["topico"] = topico
             dfs.append(df)
 
         return pd.concat(dfs, ignore_index=True)
+
+    def distancia(self, anno=True):
+        """Distancia entre tópicos del modelo.
+
+        Parameters
+        ----------
+        anno : bool
+            Cuantas palabras obtener.
+        """
+        diff, annos = self.modelo.diff(
+            self.modelo, distance="hellinger", annotation=anno
+        )
+
+        return diff, annos
