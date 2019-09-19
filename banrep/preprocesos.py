@@ -39,7 +39,9 @@ def unir_fragmentos(texto):
         Texto con palabras de fin de línea unidas si estaban partidas.
     """
     # Asume ord('-') == 45
-    return texto.replace('-\n', '').replace('-\r\n', '')
+    nuevo = re.sub(r'-\n+', '', texto)
+
+    return re.sub(r'-(\r\n)+', '', nuevo)
 
 
 def eliminar_newlines(texto):
@@ -71,9 +73,8 @@ def separar_guiones(texto):
     """
     # Asume ord('–') == 8211
     nuevo = re.sub(r'(\W)–([A-Za-z]+)', r'\1– \2', texto)
-    nuevo = re.sub(r'([A-Za-z]+)–(\W)', r'\1 –\2', nuevo)
 
-    return nuevo
+    return re.sub(r'([A-Za-z]+)–(\W)', r'\1 –\2', nuevo)
 
 
 def separar_numeros(texto):
