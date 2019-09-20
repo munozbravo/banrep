@@ -109,7 +109,7 @@ def separar_numeros(texto):
     str
         Texto con números separados de palabras.
     """
-    return re.sub(r'([A-Za-z]{2,}?)(\d+)', r'\1 \2', texto)
+    return re.sub(r'([A-Za-z]{2,}?|\))(\d+)', r'\1 \2', texto)
 
 
 def limpiar_extraccion(texto, basura=None, chars=0):
