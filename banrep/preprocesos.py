@@ -9,7 +9,7 @@ def eliminar_chars(texto, basura=None):
     Parameters
     ----------
     texto : str
-    basura : str
+    basura : Iterable
         Caracteres a eliminar.
 
     Returns
@@ -118,7 +118,7 @@ def limpiar_extraccion(texto, basura=None, chars=0):
     Parameters
     ----------
     texto : str
-    basura : str
+    basura : Iterable
         Caracteres a eliminar.
     chars : int
         Mínimo número de caracteres en una línea de texto.
@@ -132,8 +132,9 @@ def limpiar_extraccion(texto, basura=None, chars=0):
     limpio = filtrar_cortas(limpio, chars=chars)
     if limpio:
         limpio = unir_fragmentos(limpio)
-        limpio = eliminar_newlines(limpio)
         limpio = separar_guiones(limpio)
         limpio = separar_numeros(limpio)
+
+    limpio = eliminar_newlines(limpio)
 
     return limpio
