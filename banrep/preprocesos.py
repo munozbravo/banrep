@@ -9,7 +9,7 @@ def eliminar_chars(texto, basura=None):
     Parameters
     ----------
     texto : str
-    basura : str | list
+    basura : str
         Caracteres a eliminar.
 
     Returns
@@ -118,7 +118,7 @@ def limpiar_extraccion(texto, basura=None, chars=0):
     Parameters
     ----------
     texto : str
-    basura : str | list
+    basura : str
         Caracteres a eliminar.
     chars : int
         Mínimo número de caracteres en una línea de texto.
