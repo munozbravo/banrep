@@ -129,12 +129,12 @@ def limpiar_extraccion(texto, basura=None, chars=0):
        Texto procesado.
     """
     limpio = eliminar_chars(texto, basura=basura)
-    limpio = filtrar_cortas(limpio, chars=chars)
     if limpio:
         limpio = unir_fragmentos(limpio)
         limpio = separar_guiones(limpio)
         limpio = separar_numeros(limpio)
 
+    limpio = filtrar_cortas(limpio, chars=chars)
     limpio = eliminar_newlines(limpio)
 
     return limpio
