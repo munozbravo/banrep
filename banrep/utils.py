@@ -60,7 +60,7 @@ def iterar_rutas(directorio, aleatorio=False, recursivo=False, exts=None):
     rutas = (r for r in rutas if r.is_file() and not r.name.startswith("."))
 
     if exts:
-        rutas = (r for r in rutas if r.suffix in exts)
+        rutas = (r for r in rutas if any(r.suffix.endswith(e) for e in exts))
 
     todas = sorted(rutas)
     if aleatorio:
