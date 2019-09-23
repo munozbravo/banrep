@@ -92,9 +92,9 @@ def separar_guiones(texto):
         Texto con guiones de fragmentos separados de las palabras.
     """
     # Asume ord('–') == 8211
-    nuevo = re.sub(r'(\W)–([A-Za-z]+)', r'\1– \2', texto)
+    nuevo = re.sub(r'(\W)–([A-Za-zÀ-Üà-ü]+)', r'\1– \2', texto)
 
-    return re.sub(r'([A-Za-z]+)–(\W)', r'\1 –\2', nuevo)
+    return re.sub(r'([A-Za-zÀ-Üà-ü]+)–(\W)', r'\1 –\2', nuevo)
 
 
 def separar_numeros(texto):
@@ -109,7 +109,9 @@ def separar_numeros(texto):
     str
         Texto con números separados de palabras.
     """
-    return re.sub(r'([A-Za-z]{2,}?|\))(\d+)', r'\1 \2', texto)
+    nuevo = re.sub(r'(\d+)([A-Za-zÀ-Üà-ü]{2,}?|\()', r'\1 \2', texto)
+
+    return re.sub(r'([A-Za-zÀ-Üà-ü]{2,}?|\))(\d+)', r'\1 \2', nuevo)
 
 
 def limpiar_extraccion(texto, basura=None):
