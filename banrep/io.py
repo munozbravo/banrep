@@ -60,6 +60,7 @@ def guardar_texto(texto, archivo):
         for fila in texto.splitlines():
             ruta.write(fila)
             ruta.write("\n")
+            ruta.write("\n")
 
 
 def leer_palabras(archivo, hoja, col_grupo="type", col_palabras="word"):
