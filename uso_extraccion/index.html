@@ -384,25 +384,27 @@
 <span class="c1"># Asume directorio de trabajo será ~Downloads/</span>
 
 ~$ <span class="nb">cd</span> Downloads/
-~/Downloads$ python -m banrep.extraccion docs/ --salida corpus
+~/Downloads$ python -m banrep.extraccion docs/ corpus --recursivo --exts pdf --chars <span class="m">5</span>
+--basura <span class="s1">&#39;_&lt;&gt;#!&#39;</span> --basura <span class="s1">&#39;\*&#39;</span> --basura �
 </pre></div>
 
 
-<p>Si se omite directorio de salida se crea uno llamado <code>textos</code>.</p>
-<div class="codehilite"><pre><span></span><span class="c1"># No se especifica --salida</span>
-<span class="c1"># Resultado será almacenado en ~Downloads/textos</span>
-
-~/Downloads$ python -m banrep.extraccion docs/
-</pre></div>
-
-
+<p>Directorios de entrada y salida son requeridos (<code>docs</code> y <code>corpus</code> en este ejemplo).</p>
+<p>Si se incluye el flag <code>--recursivo</code>se extrae texto de subdirectorios.</p>
+<p>La opción <code>--exts</code> permite especificar extensiones de archivos a procesar. Esta no es obligatoria, pero sirve para cuando tiene otro tipo de archivos en la misma carpeta que no quiere procesar.</p>
+<p>La opción <code>--chars</code> permite determinar un número mínimo de caracteres que debe tener una línea de texto.</p>
+<p>La opción <code>--basura</code> permite especificar caracteres que se quiere eliminar del texto. Esto usa <em>regular expressions</em>, así que caracteres especiales como <em>asterisco (*)</em> deben escribirse con <em>backslash (\)</em>.</p>
 <h2>Librería</h2>
 <p>Para importar en python y usar las funciones individualmente:</p>
 <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">banrep.io</span> <span class="kn">import</span> <span class="n">guardar_texto</span>
-<span class="kn">from</span> <span class="nn">banrep.extraccion</span> <span class="kn">import</span> <span class="n">extraer_info</span><span class="p">,</span> <span class="n">extraer_archivos</span>
+<span class="kn">from</span> <span class="nn">banrep.extraccion</span> <span class="kn">import</span> <span class="n">extraer_info</span><span class="p">,</span> <span class="n">extraer_todos</span><span class="p">,</span> <span class="n">procesar_xhtml</span>
 
-<span class="c1"># Extrae el texto de pdf y lo asigna a una variable.</span>
-<span class="n">texto</span> <span class="o">=</span> <span class="n">extraer_info</span><span class="p">(</span><span class="s1">&#39;mi-super-archivo.pdf&#39;</span><span class="p">)</span>
+<span class="c1"># Extrae el texto y metadata de pdf.</span>
+<span class="n">contenido</span><span class="p">,</span> <span class="n">metadata</span> <span class="o">=</span> <span class="n">extraer_info</span><span class="p">(</span><span class="s1">&#39;mi-super-archivo.pdf&#39;</span><span class="p">)</span>
+
+<span class="c1"># Procesa el texto para limpiarlo</span>
+<span class="c1"># Puede incluir caracteres `basura` a eliminar, y mínima longitud `chars`.</span>
+<span class="n">texto</span> <span class="o">=</span> <span class="n">procesar_xhtml</span><span class="p">(</span><span class="n">contenido</span><span class="p">,</span> <span class="n">basura</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">chars</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="c1"># Guarda el texto extraído.</span>
 <span class="n">guardar_texto</span><span class="p">(</span><span class="n">texto</span><span class="p">,</span> <span class="s1">&#39;mi-super-archivo.txt&#39;</span><span class="p">)</span>
@@ -410,7 +412,7 @@
 <span class="c1"># Extrae texto de archivos en un directorio</span>
 <span class="c1"># y almacena nuevos archivos en carpeta textos.</span>
 <span class="c1"># Devuelve el número de archivos procesados.</span>
-<span class="n">n</span> <span class="o">=</span> <span class="n">extraer_archivos</span><span class="p">(</span><span class="s1">&#39;~Downloads/docs/&#39;</span><span class="p">,</span> <span class="s1">&#39;textos&#39;</span><span class="p">)</span>
+<span class="n">n</span> <span class="o">=</span> <span class="n">extraer_todos</span><span class="p">(</span><span class="s1">&#39;~Downloads/docs/&#39;</span><span class="p">,</span> <span class="s1">&#39;textos&#39;</span><span class="p">,</span> <span class="n">recursivo</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">exts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">basura</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">chars</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;{n} archivos procesados&#39;</span><span class="p">)</span>
 </pre></div>
