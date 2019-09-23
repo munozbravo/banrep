@@ -3,26 +3,6 @@
 import re
 
 
-def eliminar_chars(texto, basura=None):
-    """Elimina caracteres en texto.
-
-    Parameters
-    ----------
-    texto : str
-    basura : Iterable
-        Caracteres a eliminar.
-
-    Returns
-    -------
-    str
-       Texto sin caracteres.
-    """
-    if basura:
-        texto = re.sub(f"[{''.join(basura)}]", '', texto)
-
-    return texto
-
-
 def filtrar_cortas(texto, chars=0):
     """Filtra líneas en texto de longitud chars o inferior.
 
@@ -44,6 +24,26 @@ def filtrar_cortas(texto, chars=0):
             filtrado += linea + "\n"
 
     return filtrado
+
+
+def eliminar_chars(texto, basura=None):
+    """Elimina caracteres en texto.
+
+    Parameters
+    ----------
+    texto : str
+    basura : Iterable
+        Caracteres a eliminar.
+
+    Returns
+    -------
+    str
+       Texto sin caracteres.
+    """
+    if basura:
+        texto = re.sub(f"[{''.join(basura)}]", '', texto)
+
+    return texto
 
 
 def unir_fragmentos(texto):
@@ -112,7 +112,7 @@ def separar_numeros(texto):
     return re.sub(r'([A-Za-z]{2,}?|\))(\d+)', r'\1 \2', texto)
 
 
-def limpiar_extraccion(texto, basura=None, chars=0):
+def limpiar_extraccion(texto, basura=None):
     """Limpieza de texto extraido.
 
     Parameters
@@ -120,8 +120,6 @@ def limpiar_extraccion(texto, basura=None, chars=0):
     texto : str
     basura : Iterable
         Caracteres a eliminar.
-    chars : int
-        Mínimo número de caracteres en una línea de texto.
 
     Returns
     -------
@@ -134,7 +132,6 @@ def limpiar_extraccion(texto, basura=None, chars=0):
         limpio = separar_guiones(limpio)
         limpio = separar_numeros(limpio)
 
-    limpio = filtrar_cortas(limpio, chars=chars)
     limpio = eliminar_newlines(limpio)
 
     return limpio

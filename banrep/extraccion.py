@@ -7,7 +7,7 @@ from tika import parser
 import bs4
 
 from banrep.io import guardar_texto
-from banrep.preprocesos import limpiar_extraccion
+from banrep.preprocesos import filtrar_cortas, limpiar_extraccion
 from banrep.utils import crear_directorio, iterar_rutas
 
 
@@ -65,9 +65,12 @@ def procesar_xhtml(content, basura=None, chars=0):
 
     for p in sopa.find_all("p"):
         texto = p.get_text(strip=True)
-        texto = limpiar_extraccion(texto, basura=basura, chars=chars)
+        texto = limpiar_extraccion(texto, basura=basura)
         if texto:
             parsed += texto + "\n"
+
+    if parsed:
+        parsed = filtrar_cortas(parsed, chars=chars)
 
     return parsed
 
@@ -151,7 +154,7 @@ def main():
     parser.add_argument(
         "--basura",
         action="append",
-        help="Eliminar estos caracteres. Ej: --basura � --basura ",
+        help="Eliminar estos caracteres. Ej: --basura '<>!#' --basura � ",
     )
     parser.add_argument(
         "--chars",
