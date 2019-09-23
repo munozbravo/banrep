@@ -26,17 +26,19 @@ Con su [entorno virtual activado][install], desde la línea de comandos puede ex
 # Asume directorio de trabajo será ~Downloads/
 
 ~$ cd Downloads/
-~/Downloads$ python -m banrep.extraccion docs/ --salida corpus
+~/Downloads$ python -m banrep.extraccion docs/ corpus --recursivo --exts pdf --chars 5
+--basura '_<>#!' --basura '\*' --basura �
 ```
 
-Si se omite directorio de salida se crea uno llamado `textos`.
+Directorios de entrada y salida son requeridos (`docs` y `corpus` en este ejemplo).
 
-```bash
-# No se especifica --salida
-# Resultado será almacenado en ~Downloads/textos
+Si se incluye el flag `--recursivo`se extrae texto de subdirectorios.
 
-~/Downloads$ python -m banrep.extraccion docs/
-```
+La opción `--exts` permite especificar extensiones de archivos a procesar. Esta no es obligatoria, pero sirve para cuando tiene otro tipo de archivos en la misma carpeta que no quiere procesar.
+
+La opción `--chars` permite determinar un número mínimo de caracteres que debe tener una línea de texto.
+
+La opción `--basura` permite especificar caracteres que se quiere eliminar del texto. Esto usa *regular expressions*, así que caracteres especiales como *asterisco (\*)* deben escribirse con *backslash (\\)*.
 
 ## Librería
 
@@ -44,10 +46,14 @@ Para importar en python y usar las funciones individualmente:
 
 ```python
 from banrep.io import guardar_texto
-from banrep.extraccion import extraer_info, extraer_archivos
+from banrep.extraccion import extraer_info, extraer_todos, procesar_xhtml
 
-# Extrae el texto de pdf y lo asigna a una variable.
-texto = extraer_info('mi-super-archivo.pdf')
+# Extrae el texto y metadata de pdf.
+contenido, metadata = extraer_info('mi-super-archivo.pdf')
+
+# Procesa el texto para limpiarlo
+# Puede incluir caracteres `basura` a eliminar, y mínima longitud `chars`.
+texto = procesar_xhtml(contenido, basura=None, chars=0)
 
 # Guarda el texto extraído.
 guardar_texto(texto, 'mi-super-archivo.txt')
@@ -55,7 +61,7 @@ guardar_texto(texto, 'mi-super-archivo.txt')
 # Extrae texto de archivos en un directorio
 # y almacena nuevos archivos en carpeta textos.
 # Devuelve el número de archivos procesados.
-n = extraer_archivos('~Downloads/docs/', 'textos')
+n = extraer_todos('~Downloads/docs/', 'textos', recursivo=False, exts=None, basura=None, chars=0)
 
 print(f'{n} archivos procesados')
 ```
