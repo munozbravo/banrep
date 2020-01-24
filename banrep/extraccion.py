@@ -6,9 +6,8 @@ import json
 from tika import parser
 import bs4
 
-from banrep.io import guardar_texto
+from banrep.io import crear_directorio, iterar_rutas, guardar_texto
 from banrep.preprocesos import filtrar_cortas, limpiar_extraccion
-from banrep.utils import crear_directorio, iterar_rutas
 
 
 def extraer_info(archivo):

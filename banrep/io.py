@@ -1,11 +1,75 @@
 # coding: utf-8
-"""Módulo para funciones de lectura y escritura."""
+"""Módulo de interacción con el sistema, lectura y escritura."""
 from pathlib import Path
+import random
 
 import pandas as pd
 
 from banrep.preprocesos import filtrar_cortas
-from banrep.utils import iterar_rutas
+
+
+def crear_directorio(nombre):
+    """Crea nuevo directorio si no existe.
+
+    Si no es ruta absoluta será creado relativo al directorio de trabajo.
+
+    Parameters
+    -------------
+    nombre : str | Path
+        Nombre de nuevo directorio a crear.
+
+    Returns
+    ---------
+    Path
+        Ruta absoluta del directorio.
+    """
+    ruta = Path(nombre).resolve()
+
+    if not ruta.is_dir():
+        ruta.mkdir(parents=True, exist_ok=True)
+
+    return ruta
+
+
+def iterar_rutas(directorio, recursivo=False, aleatorio=False, exts=None):
+    """Itera rutas de archivos en directorio.
+
+    Puede ser o no recursivo, en orden o aleatorio, limitando extensiones.
+
+    Parameters
+    ----------
+    directorio : str | Path
+        Directorio a iterar.
+    recursivo: bool
+        Iterar recursivamente.
+    aleatorio : bool
+        Iterar aleatoriamente.
+    exts: Iterable
+        Solo considerar estas extensiones.
+
+    Yields
+    ------
+    Path
+        Ruta de archivo.
+    """
+    absoluto = Path(directorio).resolve()
+
+    if recursivo:
+        rutas = (r for r in absoluto.glob("**/*"))
+    else:
+        rutas = (r for r in absoluto.iterdir())
+
+    rutas = (r for r in rutas if r.is_file() and not r.name.startswith("."))
+
+    if exts:
+        rutas = (r for r in rutas if any(r.suffix.endswith(e) for e in exts))
+
+    todas = sorted(rutas)
+
+    if aleatorio:
+        random.shuffle(todas)
+
+    yield from todas
 
 
 def leer_texto(archivo):
@@ -86,7 +150,7 @@ def leer_palabras(archivo, hoja, col_grupo="type", col_palabras="word"):
     return grupos
 
 
-def df_crear_textos(df, col_id, textcol, directorio):
+def crear_txts(df, col_id, textcol, directorio):
     """Crea archivo de texto en directorio para cada record de dataframe.
 
     Parameters
