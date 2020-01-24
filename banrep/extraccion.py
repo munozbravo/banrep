@@ -7,7 +7,7 @@ from tika import parser
 import bs4
 
 from banrep.io import crear_directorio, iterar_rutas, guardar_texto
-from banrep.preprocesos import filtrar_cortas, limpiar_extraccion
+from banrep.preprocesos import limpiar_extraccion
 
 
 def extraer_info(archivo):
@@ -42,17 +42,17 @@ def extraer_info(archivo):
     return content, metadata
 
 
-def procesar_xhtml(content, basura=None, chars=0):
+def procesar_xhtml(content, chars=0, basura=None):
     """Procesa texto contenido en xhmtl.
 
     Parameters
     ----------
     content : str
         xhtml que contiene texto.
-    basura : Iterable
-        Caracteres a eliminar.
     chars : int
         Mínimo número de caracteres en una línea de texto.
+    basura : Iterable
+        Caracteres a eliminar.
 
     Returns
     -------
@@ -64,12 +64,9 @@ def procesar_xhtml(content, basura=None, chars=0):
 
     for p in sopa.find_all("p"):
         texto = p.get_text(strip=True)
-        texto = limpiar_extraccion(texto, basura=basura)
         if texto:
+            texto = limpiar_extraccion(texto, chars=chars, basura=basura)
             parsed += texto + "\n"
-
-    if parsed:
-        parsed = filtrar_cortas(parsed, chars=chars)
 
     return parsed
 
@@ -113,7 +110,7 @@ def extraer_todos(dirin, dirout, recursivo=False, exts=None, basura=None, chars=
         archivo = dirtexto.joinpath(f"{ruta.stem}.txt")
         if not archivo.exists():
             content, metadata = extraer_info(ruta)
-            texto = procesar_xhtml(content, basura=basura, chars=chars)
+            texto = procesar_xhtml(content, chars=chars, basura=basura)
             if texto:
                 guardar_texto(texto, archivo)
 

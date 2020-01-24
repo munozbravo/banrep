@@ -78,12 +78,14 @@ def separar_numeros(texto):
     return re.sub(r'([A-Za-zÀ-Üà-ü]{2,}?|\))(\d+)', r'\1 \2', nuevo)
 
 
-def limpiar_extraccion(texto, basura=None):
+def limpiar_extraccion(texto, chars=0, basura=None):
     """Limpieza de texto extraido.
 
     Parameters
     ----------
     texto : str
+    chars : int
+        Mínimo número de caracteres en una línea de texto.
     basura : Iterable
         Caracteres a eliminar.
 
@@ -92,11 +94,14 @@ def limpiar_extraccion(texto, basura=None):
     str
        Texto procesado.
     """
-    if basura:
-        texto = re.sub(f"[{''.join(basura)}]", '', texto)
-
     limpio = unir_fragmentos(texto)
     limpio = separar_guiones(limpio)
     limpio = separar_numeros(limpio)
+
+    if chars:
+        limpio = filtrar_cortas(limpio, chars=chars)
+
+    if basura:
+        limpio = re.sub(f"[{''.join(basura)}]", '', limpio)
 
     return ' '.join(limpio.split())
