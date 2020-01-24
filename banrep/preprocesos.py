@@ -26,26 +26,6 @@ def filtrar_cortas(texto, chars=0):
     return filtrado
 
 
-def eliminar_chars(texto, basura=None):
-    """Elimina caracteres en texto.
-
-    Parameters
-    ----------
-    texto : str
-    basura : Iterable
-        Caracteres a eliminar.
-
-    Returns
-    -------
-    str
-       Texto sin caracteres.
-    """
-    if basura:
-        texto = re.sub(f"[{''.join(basura)}]", '', texto)
-
-    return texto
-
-
 def unir_fragmentos(texto):
     """Une fragmentos de palabras partidas por final de línea.
 
@@ -59,24 +39,7 @@ def unir_fragmentos(texto):
         Texto con palabras de fin de línea unidas si estaban partidas.
     """
     # Asume ord('-') == 45
-    nuevo = re.sub(r'-\n+', '', texto)
-
-    return re.sub(r'-(\r\n)+', '', nuevo)
-
-
-def eliminar_newlines(texto):
-    """Elimina caracteres de fin de línea.
-
-    Parameters
-    ----------
-    texto : str
-
-    Returns
-    -------
-    str
-        Texto sin caracteres de fin de línea.
-    """
-    return ' '.join(texto.split())
+    return re.sub(r'-\n+', '', texto)
 
 
 def separar_guiones(texto):
@@ -91,8 +54,9 @@ def separar_guiones(texto):
     str
         Texto con guiones de fragmentos separados de las palabras.
     """
-    # Asume ord('–') == 8211
-    nuevo = re.sub(r'(\W)–([A-Za-zÀ-Üà-ü]+)', r'\1– \2', texto)
+    # Asume ord 8211 ó 8212
+    nuevo = re.sub(r'[—–]{1,}', '–', texto)
+    nuevo = re.sub(r'(\W)–([A-Za-zÀ-Üà-ü]+)', r'\1– \2', nuevo)
 
     return re.sub(r'([A-Za-zÀ-Üà-ü]+)–(\W)', r'\1 –\2', nuevo)
 
@@ -128,12 +92,11 @@ def limpiar_extraccion(texto, basura=None):
     str
        Texto procesado.
     """
-    limpio = eliminar_chars(texto, basura=basura)
-    if limpio:
-        limpio = unir_fragmentos(limpio)
-        limpio = separar_guiones(limpio)
-        limpio = separar_numeros(limpio)
+    if basura:
+        texto = re.sub(f"[{''.join(basura)}]", '', texto)
 
-    limpio = eliminar_newlines(limpio)
+    limpio = unir_fragmentos(texto)
+    limpio = separar_guiones(limpio)
+    limpio = separar_numeros(limpio)
 
-    return limpio
+    return ' '.join(limpio.split())
