@@ -175,6 +175,92 @@ def crear_txts(df, col_id, textcol, directorio):
     return
 
 
+class Textos:
+    """Colección de textos almacenados en archivos planos en directorio."""
+
+    def __init__(
+        self,
+        directorio,
+        aleatorio=False,
+        chars=0,
+        parrafos=False,
+        recursivo=False,
+        exts=None,
+    ):
+        """Define el directorio, iteración, y filtro de longitud de líneas.
+
+        Iteración puede ser el texto de un archivo o cada párrafo en él, filtrando líneas según longitud, recursivo o no, limitando extensiones.
+
+        Parameters
+        ----------
+        directorio : str | Path
+            Directorio a iterar.
+        aleatorio : bool
+            Iterar aleatoriamente.
+        chars : int
+            Mínimo número de caracteres en una línea de texto.
+        parrafos : bool
+            Considerar cada párrafo como documento.
+        recursivo: bool
+            Iterar recursivamente.
+        exts: Iterable
+            Solo considerar estas extensiones.
+        """
+        self.directorio = Path(directorio).resolve()
+        self.aleatorio = aleatorio
+        self.chars = chars
+        self.parrafos = parrafos
+        self.recursivo = recursivo
+        self.exts = exts
+
+    def __repr__(self):
+        return f"{self.__len__()} archivos en directorio {self.directorio.name}."
+
+    def __len__(self):
+        return len(
+            list(
+                iterar_rutas(self.directorio, recursivo=self.recursivo, exts=self.exts,)
+            )
+        )
+
+    def __iter__(self):
+        """Itera archivos y extrae detalles (texto, meta) de cada archivo.
+
+        Yields
+        ------
+        tuple (str, dict)
+            Información de cada documento (texto, metadata).
+        """
+        ndoc = 1
+
+        for archivo in iterar_rutas(
+            self.directorio,
+            aleatorio=self.aleatorio,
+            recursivo=self.recursivo,
+            exts=self.exts,
+        ):
+            texto = leer_texto(archivo)
+            if texto:
+                if self.chars:
+                    texto = filtrar_cortas(texto, chars=self.chars)
+
+                comun = {"archivo": archivo.name, "fuente": archivo.parent.name}
+
+                if self.parrafos:
+                    for p in texto.splitlines():
+                        if p:
+                            info = {"id_doc": f"{ndoc:0>7}", **comun}
+                            ndoc += 1
+
+                            yield p, info
+
+                else:
+                    meta = {"id_doc": f"{ndoc:0>7}", **comun}
+                    ndoc += 1
+
+                    yield texto, meta
+
+
 class Datos:
     """Colección de textos en DataFrame."""
 
@@ -197,10 +283,8 @@ class Datos:
         self.metacols = metacols
         self.chars = chars
 
-        self.n_docs = 0
-
     def __repr__(self):
-        return f"{self.__len__()} registros en DataFrame, {self.n_docs} procesados."
+        return f"{self.__len__()} registros en DataFrame."
 
     def __len__(self):
         return len(self.df.index)
@@ -213,10 +297,7 @@ class Datos:
         tuple (str, dict)
             Información de cada registro (texto, metadata).
         """
-        self.n_docs = 0
-
         for row in self.df.itertuples():
-            self.n_docs += 1
             texto = getattr(row, self.textcol)
             meta = {k: getattr(row, k) for k in self.metacols}
 
@@ -266,8 +347,6 @@ class Registros:
         self.recursivo = recursivo
         self.exts = exts
 
-        self.n_docs = 0
-
     def __repr__(self):
         return f"{self.__len__()} archivos en directorio {self.directorio.name}."
 
@@ -286,8 +365,6 @@ class Registros:
         tuple (str, dict)
             Información de cada registro (texto, metadata).
         """
-        self.n_docs = 0
-
         for archivo in iterar_rutas(
             self.directorio, recursivo=self.recursivo, exts=self.exts
         ):
@@ -298,105 +375,4 @@ class Registros:
 
             df = df.dropna(subset=[self.textcol])
 
-            for row in df.itertuples():
-                self.n_docs += 1
-                texto = getattr(row, self.textcol)
-                meta = {k: getattr(row, k) for k in self.metacols}
-
-                if self.chars:
-                    texto = filtrar_cortas(texto, chars=self.chars)
-
-                yield texto, meta
-
-
-class Textos:
-    """Colección de textos almacenados en archivos planos en directorio."""
-
-    def __init__(
-        self,
-        directorio,
-        aleatorio=False,
-        chars=0,
-        parrafos=False,
-        recursivo=False,
-        exts=None,
-    ):
-        """Define el directorio, iteración, y filtro de longitud de líneas.
-
-        Iteración puede ser el texto de un archivo o cada párrafo en él, filtrando líneas según longitud, recursivo o no, limitando extensiones.
-
-        Parameters
-        ----------
-        directorio : str | Path
-            Directorio a iterar.
-        aleatorio : bool
-            Iterar aleatoriamente.
-        chars : int
-            Mínimo número de caracteres en una línea de texto.
-        parrafos : bool
-            Considerar cada párrafo como documento.
-        recursivo: bool
-            Iterar recursivamente.
-        exts: Iterable
-            Solo considerar estas extensiones.
-        """
-        self.directorio = Path(directorio).resolve()
-        self.aleatorio = aleatorio
-        self.chars = chars
-        self.parrafos = parrafos
-        self.recursivo = recursivo
-        self.exts = exts
-
-        self.n_docs = 0
-
-    def __repr__(self):
-        return f"{self.__len__()} archivos en directorio {self.directorio.name}."
-
-    def __len__(self):
-        return len(
-            list(
-                iterar_rutas(
-                    self.directorio,
-                    aleatorio=self.aleatorio,
-                    recursivo=self.recursivo,
-                    exts=self.exts,
-                )
-            )
-        )
-
-    def __iter__(self):
-        """Itera archivos y extrae detalles (texto, meta) de cada archivo.
-
-        Yields
-        ------
-        tuple (str, dict)
-            Información de cada documento (texto, metadata).
-        """
-        self.n_docs = 0
-
-        for archivo in iterar_rutas(
-            self.directorio,
-            aleatorio=self.aleatorio,
-            recursivo=self.recursivo,
-            exts=self.exts,
-        ):
-            texto = leer_texto(archivo)
-            if texto:
-                if self.chars:
-                    texto = filtrar_cortas(texto, chars=self.chars)
-
-                comun = {"archivo": archivo.name, "fuente": archivo.parent.name}
-
-                if self.parrafos:
-                    for p in texto.splitlines():
-                        if p:
-                            self.n_docs += 1
-                            info = {"doc_id": f"{self.n_docs:0>6}", **comun}
-
-                            yield p, info
-
-                else:
-                    self.n_docs += 1
-                    meta = {"doc_id": f"{self.n_docs:0>6}", **comun}
-
-                    yield texto, meta
+            yield from Datos(df, self.textcol, self.metacols, chars=self.chars)
