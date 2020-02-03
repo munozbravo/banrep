@@ -2,14 +2,6 @@
 
 Ver [este ejemplo][ej_nbviewer] de cómo usar la librería. Le mostrará línea por línea el uso de las funciones principales. Cada celda viene precedida por una explicación de lo que hace el código de esa celda.
 
-!!! info "Visualización PyLDAvis"
-    GitHub no permite mostrar cierto contenido HTML directamente en su vista de Notebooks, por eso el link anterior usa nbviewer que sí lo permite.
-
-    Si tiene problemas con el link, usar directamente el [notebook en el repositorio][uso_general].
-
-
-[uso_general]: https://github.com/munozbravo/banrep/blob/master/banrep/notebooks/uso_general.ipynb
-
 [ej_nbviewer]: https://nbviewer.jupyter.org/github/munozbravo/banrep/blob/master/banrep/notebooks/uso_general.ipynb
 
 
@@ -25,11 +17,15 @@ Ver [este ejemplo][ej_nbviewer] de cómo usar la librería. Le mostrará línea 
 
 Todo proyecto de análisis de texto empieza por definir el corpus, conjunto de documentos, a ser analizado. Esto implica cargar el texto de cada archivo, decidir si todo el texto es relevante o si debe ser pre-procesado para excluir, por ejemplo, filas de corta longitud (títulos, etc.), notas de pie de página (si el texto permite identificarlas de forma estandarizada).
 
+La librería ofrece funciones para cargar datos almacenados en archivos de texto (`Textos`) o en tablas tipo *csv* o *excel* (`Registros` y `Datos`).
+
+## Linguística
+
 En cada texto hay que identificar frases y palabras, y definir cuales de ellas mantener para analizar y cuales filtrar. Para esto se usan filtros como listas de palabras *stopwords*, que por ser tan usuales no aportan mucho valor al análisis, o definir si solo usar palabras e ignorar números, símbolos, puntuación, etc.
 
 Para calcular sentimiento se suelen usar también listas de palabras predefinidas, que se asocian con diferentes emociones contrarias (positivas vs negativas, por ejemplo), y con base en conteos de presencia de esas palabras en el corpus se puede crear un indicador de sentimiento a lo largo del tiempo.
 
-Con base en estas consideraciones se crea la *Clase* del corpus (llamada `MiCorpus` en esta librería), que permite generar las estadísticas descriptivas y conteos de palabras requeridos en análisis posteriores. Es probablemente la estructura más importante de la librería.
+Con base en estas consideraciones esta librería ofrece `Documentos`, que permite generar las estadísticas descriptivas y conteos de palabras requeridos en análisis posteriores. Es la estructura más importante de la librería.
 
 Esta librería se basa principalmente en [spaCy][web_spacy] para la implementación de todo el "pipeline" de procesamiento de texto.
 

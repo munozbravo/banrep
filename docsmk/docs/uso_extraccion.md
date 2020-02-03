@@ -21,16 +21,15 @@ Una necesidad común para analizar texto es poder extraerlo de archivos pdf, wor
 Con su [entorno virtual activado][install], desde la línea de comandos puede extraer el texto de cada archivo que tenga guardado en una carpeta, y almacenarlo en un nuevo archivo *.txt* que será guardado en una nueva carpeta.
 
 ```bash
-# En este ejemplo tiene documentos en carpeta ~/Downloads/docs/
+# En este ejemplo tiene documentos en carpeta ~/Downloads/pubs/
 # Textos serán almacenado en ~Downloads/corpus/
-# Asume directorio de trabajo será ~Downloads/
+# Ejemplo asume directorio de trabajo será ~Downloads/
 
 ~$ cd Downloads/
-~/Downloads$ python -m banrep.extraccion docs/ corpus --recursivo --exts pdf --chars 5
---basura '_<>#!' --basura '\*' --basura �
+~/Downloads$ python -m banrep.extraccion pubs corpus --recursivo --exts pdf --chars 5 --basura '_<>#!' --basura '\*' --basura �
 ```
 
-Directorios de entrada y salida son requeridos (`docs` y `corpus` en este ejemplo).
+Directorios de entrada y salida son requeridos (`pubs` y `corpus` en este ejemplo).
 
 Si se incluye el flag `--recursivo`se extrae texto de subdirectorios.
 
@@ -61,7 +60,7 @@ guardar_texto(texto, 'mi-super-archivo.txt')
 # Extrae texto de archivos en un directorio
 # y almacena nuevos archivos en carpeta textos.
 # Devuelve el número de archivos procesados.
-n = extraer_todos('~Downloads/docs/', 'textos', recursivo=False, exts=None, basura=None, chars=0)
+n = extraer_todos('~Downloads/pubs/', 'corpus', recursivo=True, exts=None, basura=None, chars=0)
 
 print(f'{n} archivos procesados')
 ```

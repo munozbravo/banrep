@@ -6,7 +6,6 @@ edit_uri: ""
 
 nav:
     - Guía: 'index.md'
-    - Introducción: 'intro.md'
     - Instalación: 'instalacion.md'
     - Modo de Uso:
         - 'uso_extraccion.md'
