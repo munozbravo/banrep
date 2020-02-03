@@ -1,6 +1,7 @@
 # coding: utf-8
 """Módulo de interacción con el sistema, lectura y escritura."""
 from pathlib import Path
+import json
 import random
 
 import pandas as pd
@@ -125,6 +126,65 @@ def guardar_texto(texto, archivo):
             ruta.write(fila)
             ruta.write("\n")
             ruta.write("\n")
+
+
+def leer_jsonl(archivo):
+    """Lee objetos json de archivo.
+
+    Parameters
+    ----------
+    archivo : str | Path
+        Ruta del archivo del cual se quiere leer objetos json.
+
+    Yields
+    ------
+    dict
+       Contenido de cada objeto json.
+    """
+    ruta = Path(archivo).resolve()
+    nombre = ruta.name
+    carpeta = ruta.parent.name
+
+    try:
+        with open(ruta, encoding="utf-8") as f:
+            for line in f:
+                try:
+                    yield json.loads(line.strip())
+                except ValueError:
+                    print(f"Ignorando registro de archivo {nombre} en {carpeta}.")
+
+    except OSError:
+        print(f"No puede abrirse archivo {nombre} en {carpeta}.")
+    except UnicodeDecodeError:
+        print(f"No puede leerse archivo {nombre} en {carpeta}.")
+    except Exception:
+        print(f"Error inesperado leyendo {nombre} en {carpeta}")
+
+
+def guardar_jsonl(archivo, objs):
+    """Guarda objetos json en archivo.
+
+    Parameters
+    ----------
+    archivo : str | Path
+        Ruta del archivo del cual se quiere leer objetos json.
+    objs : Iterable[dict]
+        Contenido de cada objeto json a guardar.
+
+    Returns
+    -------
+    None
+    """
+    ruta = Path(archivo).resolve()
+    nombre = ruta.name
+    with open(ruta, "w", newline="\n", encoding="utf-8") as f:
+        n = 0
+        for objeto in objs:
+            json.dump(objeto, f, ensure_ascii=False, )
+            f.write("\n")
+            n += 1
+
+    print(f"Guardados {n} registros en {nombre}")
 
 
 def leer_palabras(archivo, hoja, col_grupo="type", col_palabras="word"):
