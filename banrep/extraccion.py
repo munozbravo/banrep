@@ -6,7 +6,7 @@ import json
 from tika import parser
 import bs4
 
-from banrep.io import crear_directorio, iterar_rutas, guardar_texto
+from banrep.io import crear_carpeta, iterar_rutas, guardar_texto
 from banrep.preprocesos import limpiar_extraccion
 
 
@@ -96,7 +96,7 @@ def extraer_todos(dirin, dirout, recursivo=False, exts=None, basura=None, chars=
     """
     dirdocs = Path(dirin).resolve()
     dirtextos = Path(dirout).resolve()
-    dirmeta = crear_directorio(dirtextos.joinpath("metadata"))
+    dirmeta = crear_carpeta(dirtextos.joinpath("metadata"))
 
     nparts = len(dirdocs.parts)
 
@@ -105,7 +105,7 @@ def extraer_todos(dirin, dirout, recursivo=False, exts=None, basura=None, chars=
         partes = ruta.parent.parts[nparts:]
         dirtexto = dirtextos.joinpath(*partes)
         if not dirtexto.exists():
-            dirtexto = crear_directorio(dirtexto)
+            dirtexto = crear_carpeta(dirtexto)
 
         archivo = dirtexto.joinpath(f"{ruta.stem}.txt")
         if not archivo.exists():
@@ -116,7 +116,7 @@ def extraer_todos(dirin, dirout, recursivo=False, exts=None, basura=None, chars=
 
                 metaout = dirmeta.joinpath(*partes)
                 if not metaout.exists():
-                    metaout = crear_directorio(metaout)
+                    metaout = crear_carpeta(metaout)
 
                 metafile = metaout.joinpath(f"{ruta.stem}.json")
                 with open(metafile, "w", encoding="utf-8") as out:
@@ -171,7 +171,7 @@ def main():
     n = extraer_todos(
         dirin, dirout, recursivo=recursivo, exts=exts, basura=basura, chars=chars
     )
-    print(f"{n} nuevos archivos guardados en directorio {str(dirout)}")
+    print(f"{n} nuevos archivos guardados en carpeta {str(dirout)}")
 
 
 if __name__ == "__main__":
