@@ -9,20 +9,20 @@ import pandas as pd
 from banrep.preprocesos import filtrar_cortas
 
 
-def crear_directorio(nombre):
-    """Crea nuevo directorio si no existe.
+def crear_carpeta(nombre):
+    """Crea nueva carpeta en disco si no existe.
 
-    Si no es ruta absoluta será creado relativo al directorio de trabajo.
+    Si no es ruta absoluta será creada relativo a carpeta de trabajo.
 
     Parameters
     -------------
     nombre : str | Path
-        Nombre de nuevo directorio a crear.
+        Nombre de carpeta a crear.
 
     Returns
     ---------
     Path
-        Ruta absoluta del directorio.
+        Ruta absoluta de carpeta.
     """
     ruta = Path(nombre).resolve()
 
@@ -32,14 +32,14 @@ def crear_directorio(nombre):
     return ruta
 
 
-def iterar_rutas(directorio, recursivo=False, aleatorio=False, exts=None):
-    """Itera rutas de archivos en directorio.
+def iterar_rutas(carpeta, recursivo=False, aleatorio=False, exts=None):
+    """Itera rutas de archivos en carpeta.
 
     Puede ser o no recursivo, en orden o aleatorio, limitando extensiones.
 
     Parameters
     ----------
-    directorio : str | Path
+    carpeta : str | Path
         Directorio a iterar.
     recursivo: bool
         Iterar recursivamente.
@@ -53,7 +53,7 @@ def iterar_rutas(directorio, recursivo=False, aleatorio=False, exts=None):
     Path
         Ruta de archivo.
     """
-    absoluto = Path(directorio).resolve()
+    absoluto = Path(carpeta).resolve()
 
     if recursivo:
         rutas = (r for r in absoluto.glob("**/*"))
@@ -167,7 +167,7 @@ def guardar_jsonl(archivo, objs):
     Parameters
     ----------
     archivo : str | Path
-        Ruta del archivo del cual se quiere leer objetos json.
+        Ruta del archivo en el cual se quiere guardar objetos json.
     objs : Iterable[dict]
         Contenido de cada objeto json a guardar.
 
@@ -180,7 +180,7 @@ def guardar_jsonl(archivo, objs):
     with open(ruta, "w", newline="\n", encoding="utf-8") as f:
         n = 0
         for objeto in objs:
-            json.dump(objeto, f, ensure_ascii=False, )
+            json.dump(objeto, f, ensure_ascii=False)
             f.write("\n")
             n += 1
 
@@ -210,8 +210,8 @@ def leer_palabras(archivo, hoja, col_grupo="type", col_palabras="word"):
     return grupos
 
 
-def crear_txts(df, col_id, textcol, directorio):
-    """Crea archivo de texto en directorio para cada record de dataframe.
+def crear_txts(df, col_id, textcol, carpeta):
+    """Crea archivo de texto en carpeta para cada record de dataframe.
 
     Parameters
     ----------
@@ -221,14 +221,14 @@ def crear_txts(df, col_id, textcol, directorio):
         Nombre de columna con valores únicos para usar en nombre archivo.
     textcol: str
         Nombre de columna que contiene texto en sus filas.
-    directorio: str | Path
+    carpeta: str | Path
         Directorio en donde se quiere guardar los archivos de texto.
 
     Returns
     ---------
     None
     """
-    salida = Path(directorio).resolve()
+    salida = Path(carpeta).resolve()
     df["nombres"] = df[col_id].apply(lambda x: salida.joinpath(f"{x}.txt"))
     df.apply(lambda x: guardar_texto(x[textcol], x["nombres"]), axis=1)
 
@@ -236,24 +236,24 @@ def crear_txts(df, col_id, textcol, directorio):
 
 
 class Textos:
-    """Colección de textos almacenados en archivos planos en directorio."""
+    """Colección de textos almacenados en archivos planos en carpeta."""
 
     def __init__(
         self,
-        directorio,
+        carpeta,
         aleatorio=False,
         chars=0,
         parrafos=False,
         recursivo=False,
         exts=None,
     ):
-        """Define el directorio, iteración, y filtro de longitud de líneas.
+        """Define carpeta, iteración, y filtro de longitud de líneas.
 
         Iteración puede ser el texto de un archivo o cada párrafo en él, filtrando líneas según longitud, recursivo o no, limitando extensiones.
 
         Parameters
         ----------
-        directorio : str | Path
+        carpeta : str | Path
             Directorio a iterar.
         aleatorio : bool
             Iterar aleatoriamente.
@@ -266,22 +266,20 @@ class Textos:
         exts: Iterable
             Solo considerar estas extensiones.
         """
-        self.directorio = Path(directorio).resolve()
+        self.absoluto = Path(carpeta).resolve()
         self.aleatorio = aleatorio
         self.chars = chars
         self.parrafos = parrafos
         self.recursivo = recursivo
         self.exts = exts
 
-    def __repr__(self):
-        return f"{self.__len__()} archivos en directorio {self.directorio.name}."
+        self.n = 0
 
     def __len__(self):
-        return len(
-            list(
-                iterar_rutas(self.directorio, recursivo=self.recursivo, exts=self.exts,)
-            )
-        )
+        return self.n
+
+    def __repr__(self):
+        return f"{self.__len__()} archivos leídos de carpeta {self.absoluto.name}."
 
     def __iter__(self):
         """Itera archivos y extrae detalles (texto, meta) de cada archivo.
@@ -291,16 +289,18 @@ class Textos:
         tuple (str, dict)
             Información de cada documento (texto, metadata).
         """
+        self.n = 0
         ndoc = 1
 
         for archivo in iterar_rutas(
-            self.directorio,
+            self.absoluto,
             aleatorio=self.aleatorio,
             recursivo=self.recursivo,
             exts=self.exts,
         ):
             texto = leer_texto(archivo)
             if texto:
+                self.n += 1
                 if self.chars:
                     texto = filtrar_cortas(texto, chars=self.chars)
 
@@ -372,7 +372,7 @@ class Registros:
 
     def __init__(
         self,
-        directorio,
+        carpeta,
         textcol,
         metacols,
         chars=0,
@@ -380,12 +380,12 @@ class Registros:
         recursivo=False,
         exts=None,
     ):
-        """Define el directorio, columnas para texto y metadata, y tipo archivo.
+        """Define carpeta, columnas para texto y metadata, y tipo archivo.
 
         Parameters
         ----------
-        directorio : str | Path
-            Ruta del directorio que se quiere iterar.
+        carpeta : str | Path
+            Ruta de carpeta que se quiere iterar.
         textcol : str
             Nombre de columna que contiene texto en sus filas.
         metacols : list
@@ -399,7 +399,7 @@ class Registros:
         exts: Iterable
             Solo considerar estas extensiones.
         """
-        self.directorio = Path(directorio).resolve()
+        self.absoluto = Path(carpeta).resolve()
         self.textcol = textcol
         self.metacols = metacols
         self.chars = chars
@@ -407,15 +407,13 @@ class Registros:
         self.recursivo = recursivo
         self.exts = exts
 
+        self.n = 0
+
     def __repr__(self):
-        return f"{self.__len__()} archivos en directorio {self.directorio.name}."
+        return f"{self.__len__()} archivos en carpeta {self.absoluto.name}."
 
     def __len__(self):
-        return len(
-            list(
-                iterar_rutas(self.directorio, recursivo=self.recursivo, exts=self.exts)
-            )
-        )
+        return self.n
 
     def __iter__(self):
         """Itera archivos y extrae detalles (texto, meta) de cada registro.
@@ -425,8 +423,10 @@ class Registros:
         tuple (str, dict)
             Información de cada registro (texto, metadata).
         """
+        self.n = 0
+
         for archivo in iterar_rutas(
-            self.directorio, recursivo=self.recursivo, exts=self.exts
+            self.absoluto, recursivo=self.recursivo, exts=self.exts
         ):
             if self.hoja:
                 df = pd.read_excel(archivo, sheet_name=self.hoja)
@@ -434,5 +434,7 @@ class Registros:
                 df = pd.read_csv(archivo)
 
             df = df.dropna(subset=[self.textcol])
+
+            self.n += 1
 
             yield from Datos(df, self.textcol, self.metacols, chars=self.chars)
