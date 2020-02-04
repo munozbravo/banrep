@@ -45,7 +45,7 @@ def iterar_rutas(carpeta, recursivo=False, aleatorio=False, exts=None):
         Iterar recursivamente.
     aleatorio : bool
         Iterar aleatoriamente.
-    exts: Iterable
+    exts: Iterable[str]
         Solo considerar estas extensiones.
 
     Yields
@@ -187,17 +187,19 @@ def guardar_jsonl(archivo, objs):
     print(f"Guardados {n} registros en {nombre}")
 
 
-def leer_palabras(archivo, hoja, col_grupo="type", col_palabras="word"):
+def leer_palabras(archivo, hoja, c_grupo, c_palabras):
     """Extrae grupos de palabras de un archivo Excel.
-
-    Agrupa `col_palabras` por columna `col_grupo` de hoja `hoja` de archivo Excel.
 
     Parameters
     ----------
     archivo : str | Path
+        Ruta del archivo Excel en disco.
     hoja : str
-    col_grupo : str
-    col_palabras : str
+        Hoja de cálculo de archivo Excel.
+    c_grupo : str
+        Nombre de columna para determinar grupos.
+    c_palabras : str
+        Nombre de columna que contiene palabras de cada grupo.
 
     Returns
     -------
@@ -205,7 +207,7 @@ def leer_palabras(archivo, hoja, col_grupo="type", col_palabras="word"):
        Grupos de palabras en cada grupo.
     """
     df = pd.read_excel(archivo, sheet_name=hoja)
-    grupos = {k: set(v) for k, v in df.groupby(col_grupo)[col_palabras]}
+    grupos = {k: set(v) for k, v in df.groupby(c_grupo)[c_palabras]}
 
     return grupos
 
@@ -236,42 +238,43 @@ def crear_txts(df, col_id, textcol, carpeta):
 
 
 class Textos:
-    """Colección de textos almacenados en archivos planos en carpeta."""
+    """Colección de textos almacenados en archivos planos en carpeta.
+
+    Itera archivos y extrae texto y metadata a considerar como documento.
+    """
 
     def __init__(
         self,
         carpeta,
+        recursivo=False,
         aleatorio=False,
+        exts=None,
         chars=0,
         parrafos=False,
-        recursivo=False,
-        exts=None,
     ):
-        """Define carpeta, iteración, y filtro de longitud de líneas.
-
-        Iteración puede ser el texto de un archivo o cada párrafo en él, filtrando líneas según longitud, recursivo o no, limitando extensiones.
+        """Requiere: carpeta. Opcional: recursivo, aleatorio, exts, chars, párrafos.
 
         Parameters
         ----------
         carpeta : str | Path
             Directorio a iterar.
+        recursivo: bool
+            Iterar recursivamente.
         aleatorio : bool
             Iterar aleatoriamente.
+        exts: Iterable[str]
+            Solo considerar estas extensiones de archivo.
         chars : int
             Mínimo número de caracteres en una línea de texto.
         parrafos : bool
             Considerar cada párrafo como documento.
-        recursivo: bool
-            Iterar recursivamente.
-        exts: Iterable
-            Solo considerar estas extensiones.
         """
         self.absoluto = Path(carpeta).resolve()
+        self.recursivo = recursivo
         self.aleatorio = aleatorio
+        self.exts = exts
         self.chars = chars
         self.parrafos = parrafos
-        self.recursivo = recursivo
-        self.exts = exts
 
         self.n = 0
 
@@ -282,12 +285,12 @@ class Textos:
         return f"{self.__len__()} archivos leídos de carpeta {self.absoluto.name}."
 
     def __iter__(self):
-        """Itera archivos y extrae detalles (texto, meta) de cada archivo.
+        """Itera archivos y extrae texto y metadata de cada archivo.
 
         Yields
         ------
         tuple (str, dict)
-            Información de cada documento (texto, metadata).
+            Texto y metadata de cada documento.
         """
         self.n = 0
         ndoc = 1
@@ -322,10 +325,13 @@ class Textos:
 
 
 class Datos:
-    """Colección de textos en DataFrame."""
+    """Colección de textos en DataFrame.
+
+    Itera registros y extrae texto y metadata a considerar como documento.
+    """
 
     def __init__(self, df, textcol, metacols, chars=0):
-        """Define parametros.
+        """Requiere: df, textcol, metacols. Opcional: chars.
 
         Parameters
         ----------
@@ -350,12 +356,12 @@ class Datos:
         return len(self.df.index)
 
     def __iter__(self):
-        """Itera registros de DataFrame y extrae detalles (texto, meta).
+        """Itera registros de DataFrame y extrae texto y metadata.
 
         Yields
         ------
         tuple (str, dict)
-            Información de cada registro (texto, metadata).
+            Texto y metadata de cada registro.
         """
         for row in self.df.itertuples():
             texto = getattr(row, self.textcol)
@@ -368,19 +374,22 @@ class Datos:
 
 
 class Registros:
-    """Colección de textos almacenados en archivos csv o Excel."""
+    """Colección de textos almacenados en archivos csv o Excel.
+
+    Itera archivos y extrae texto y metadata de cada DataFrame resultante.
+    """
 
     def __init__(
         self,
         carpeta,
         textcol,
         metacols,
-        chars=0,
-        hoja=None,
         recursivo=False,
         exts=None,
+        chars=0,
+        hoja=None,
     ):
-        """Define carpeta, columnas para texto y metadata, y tipo archivo.
+        """Requiere: carpeta, textcol, metacols. Opcional: recursivo, exts, chars, hoja.
 
         Parameters
         ----------
@@ -390,14 +399,14 @@ class Registros:
             Nombre de columna que contiene texto en sus filas.
         metacols : list
             Nombre de columnas a incluir como metadata.
-        chars : int
-            Mínimo número de caracteres en una línea de texto.
-        hoja : str
-            Nombre de hoja en archivo, si excel.
         recursivo: bool
             Iterar recursivamente.
         exts: Iterable
-            Solo considerar estas extensiones.
+            Solo considerar estas extensiones de archivo.
+        chars : int
+            Mínimo número de caracteres en una línea de texto.
+        hoja : str
+            Nombre de hoja en archivo excel.
         """
         self.absoluto = Path(carpeta).resolve()
         self.textcol = textcol
@@ -416,12 +425,12 @@ class Registros:
         return self.n
 
     def __iter__(self):
-        """Itera archivos y extrae detalles (texto, meta) de cada registro.
+        """Itera archivos y extrae texto y metadata de cada registro.
 
         Yields
         ------
         tuple (str, dict)
-            Información de cada registro (texto, metadata).
+            Texto y metadata de cada registro.
         """
         self.n = 0
 
