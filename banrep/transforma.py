@@ -74,10 +74,13 @@ def ngram_frases(docs, ngrams):
 
 
 class Bow:
-    """Colección de documentos Bag Of Words."""
+    """Colección de documentos Bag Of Words.
+
+    Itera frases de documentos y obtiene las palabras de cada uno.
+    """
 
     def __init__(self, docs, ngrams, id_doc, id2word=None):
-        """Define parámetros.
+        """Requiere docs, ngramas, id_doc. Opcional: id2word.
 
         Parameters
         ----------
@@ -86,7 +89,7 @@ class Bow:
         ngrams : dict (str: gensim.models.phrases.Phraser)
             Modelos de n-gramas (bigrams, trigrams).
         id_doc : str
-            Llave de Metadata que identifica documento.
+            Llave de Metadata que identifica documentos.
         id2word : gensim.corpora.Dictionary, optional
             Diccionario de tokens a considerar.
         """
@@ -114,12 +117,12 @@ class Bow:
 
         Yields
         ------
-        tuple (str, list(str))
-            Identificación única de cada documento y Bag of Words.
+        tuple (str, list(str), list(tuple(int, int)))
+            Identificación única de cada documento y Bags of Words.
         """
         self.n = 0
         for id_doc, tokens in self.doc_tokens().items():
-            yield id_doc, tokens
+            yield id_doc, tokens, self.id2word.doc2bow(tokens)
             self.n += 1
 
     def doc_tokens(self):
