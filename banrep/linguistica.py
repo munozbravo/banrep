@@ -6,10 +6,13 @@ from spacy.tokens import Token
 
 
 class Documentos:
-    """Colección de frases de documentos, procesadas lingüísticamente."""
+    """Colección de frases de documentos, procesadas lingüísticamente.
+
+    Itera documentos y obtiene anotaciones lingüísticas de cada frase.
+    """
 
     def __init__(self, lang, datos, tk=0, filtros=None, grupos=None, entes=None):
-        """Define parámetros de inicio.
+        """Requiere: lang, datos. Opcional tk, filtros, grupos, entes.
 
         Parameters
         ----------
