@@ -9,7 +9,7 @@ def df_palabras(docs):
 
     Parameters
     ----------
-    docs : dict (text: str, tokens: list, meta: dict)
+    docs : Iterable[dict (text: str, tokens: list, meta: dict)]
         Anotaciones lingüísticas de cada frase.
 
     Returns
@@ -32,7 +32,7 @@ def df_frases(docs):
 
     Parameters
     ----------
-    docs : dict (text: str, tokens: list, meta: dict)
+    docs : Iterable[dict (text: str, tokens: list, meta: dict)]
         Anotaciones lingüísticas de cada frase.
 
     Returns
