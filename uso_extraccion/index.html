@@ -249,18 +249,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../intro/" title="Introducción" class="md-nav__link">
-      Introducción
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
     <a href="../instalacion/" title="Instalación" class="md-nav__link">
       Instalación
     </a>
@@ -276,13 +264,13 @@
 
   <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" checked>
     
-    <label class="md-nav__link" for="nav-4">
+    <label class="md-nav__link" for="nav-3">
       Modo de Uso
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-4">
+      <label class="md-nav__title" for="nav-3">
         Modo de Uso
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -379,17 +367,16 @@
 </div>
 <h2>Línea de comandos</h2>
 <p>Con su <a href="../instalacion/">entorno virtual activado</a>, desde la línea de comandos puede extraer el texto de cada archivo que tenga guardado en una carpeta, y almacenarlo en un nuevo archivo <em>.txt</em> que será guardado en una nueva carpeta.</p>
-<div class="codehilite"><pre><span></span><span class="c1"># En este ejemplo tiene documentos en carpeta ~/Downloads/docs/</span>
+<div class="codehilite"><pre><span></span><span class="c1"># En este ejemplo tiene documentos en carpeta ~/Downloads/pubs/</span>
 <span class="c1"># Textos serán almacenado en ~Downloads/corpus/</span>
-<span class="c1"># Asume directorio de trabajo será ~Downloads/</span>
+<span class="c1"># Ejemplo asume directorio de trabajo será ~Downloads/</span>
 
 ~$ <span class="nb">cd</span> Downloads/
-~/Downloads$ python -m banrep.extraccion docs/ corpus --recursivo --exts pdf --chars <span class="m">5</span>
---basura <span class="s1">&#39;_&lt;&gt;#!&#39;</span> --basura <span class="s1">&#39;\*&#39;</span> --basura �
+~/Downloads$ python -m banrep.extraccion pubs corpus --recursivo --exts pdf --chars <span class="m">5</span> --basura <span class="s1">&#39;_&lt;&gt;#!&#39;</span> --basura <span class="s1">&#39;\*&#39;</span> --basura �
 </pre></div>
 
 
-<p>Directorios de entrada y salida son requeridos (<code>docs</code> y <code>corpus</code> en este ejemplo).</p>
+<p>Directorios de entrada y salida son requeridos (<code>pubs</code> y <code>corpus</code> en este ejemplo).</p>
 <p>Si se incluye el flag <code>--recursivo</code>se extrae texto de subdirectorios.</p>
 <p>La opción <code>--exts</code> permite especificar extensiones de archivos a procesar. Esta no es obligatoria, pero sirve para cuando tiene otro tipo de archivos en la misma carpeta que no quiere procesar.</p>
 <p>La opción <code>--chars</code> permite determinar un número mínimo de caracteres que debe tener una línea de texto.</p>
@@ -404,7 +391,7 @@
 
 <span class="c1"># Procesa el texto para limpiarlo</span>
 <span class="c1"># Puede incluir caracteres `basura` a eliminar, y mínima longitud `chars`.</span>
-<span class="n">texto</span> <span class="o">=</span> <span class="n">procesar_xhtml</span><span class="p">(</span><span class="n">contenido</span><span class="p">,</span> <span class="n">basura</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">chars</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">texto</span> <span class="o">=</span> <span class="n">procesar_xhtml</span><span class="p">(</span><span class="n">contenido</span><span class="p">,</span> <span class="n">basura</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chars</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="c1"># Guarda el texto extraído.</span>
 <span class="n">guardar_texto</span><span class="p">(</span><span class="n">texto</span><span class="p">,</span> <span class="s1">&#39;mi-super-archivo.txt&#39;</span><span class="p">)</span>
@@ -412,9 +399,9 @@
 <span class="c1"># Extrae texto de archivos en un directorio</span>
 <span class="c1"># y almacena nuevos archivos en carpeta textos.</span>
 <span class="c1"># Devuelve el número de archivos procesados.</span>
-<span class="n">n</span> <span class="o">=</span> <span class="n">extraer_todos</span><span class="p">(</span><span class="s1">&#39;~Downloads/docs/&#39;</span><span class="p">,</span> <span class="s1">&#39;textos&#39;</span><span class="p">,</span> <span class="n">recursivo</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">exts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">basura</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">chars</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">n</span> <span class="o">=</span> <span class="n">extraer_todos</span><span class="p">(</span><span class="s1">&#39;Downloads/pubs/&#39;</span><span class="p">,</span> <span class="s1">&#39;Downloads/corpus/&#39;</span><span class="p">,</span> <span class="n">recursivo</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">basura</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chars</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-<span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;{n} archivos procesados&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{n}</span><span class="s1"> archivos procesados&#39;</span><span class="p">)</span>
 </pre></div>
 
 

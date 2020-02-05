@@ -249,18 +249,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../intro/" title="Introducción" class="md-nav__link">
-      Introducción
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
     <a href="../instalacion/" title="Instalación" class="md-nav__link">
       Instalación
     </a>
@@ -276,13 +264,13 @@
 
   <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" checked>
     
-    <label class="md-nav__link" for="nav-4">
+    <label class="md-nav__link" for="nav-3">
       Modo de Uso
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-4">
+      <label class="md-nav__title" for="nav-3">
         Modo de Uso
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -368,26 +356,23 @@
                 
                 <h1 id="uso-general">Uso general</h1>
 <p>Ver <a href="https://nbviewer.jupyter.org/github/munozbravo/banrep/blob/master/banrep/notebooks/uso_general.ipynb">este ejemplo</a> de cómo usar la librería. Le mostrará línea por línea el uso de las funciones principales. Cada celda viene precedida por una explicación de lo que hace el código de esa celda.</p>
-<div class="admonition info">
-<p class="admonition-title">Visualización PyLDAvis</p>
-<p>GitHub no permite mostrar cierto contenido HTML directamente en su vista de Notebooks, por eso el link anterior usa nbviewer que sí lo permite.</p>
-<p>Si tiene problemas con el link, usar directamente el <a href="https://github.com/munozbravo/banrep/blob/master/banrep/notebooks/uso_general.ipynb">notebook en el repositorio</a>.</p>
-</div>
 <div class="admonition note">
 <p class="admonition-title">Uso de entorno virtual</p>
 <p>Para usar <a href="https://pypi.org/project/banrep/">banrep</a> se recomienda hacerlo dentro de un entorno virtual.</p>
 <p>Puede ver la sección de <a href="../instalacion/">instalación</a> para instrucciones sobre cómo crearlo y activarlo.</p>
 </div>
 <h2>Corpus</h2>
-<p>Todo proyecto de análisis de texto empieza por definir el corpus, conjunto de documentos, a ser analizado. Esto implica cargar el texto de cada archivo, decidir si todo el texto es relevante o si debe ser pre-procesado para excluir, por ejemplo, filas de corta longitud (títulos, etc.), notas de pie de página (si el texto permite identificarlas de forma estandarizada).</p>
+<p>Todo proyecto de análisis de texto empieza por definir el corpus, conjunto de documentos, a ser analizado. Esto implica cargar el texto de cada archivo, decidir si todo el texto es relevante o si debe ser pre-procesado para excluir, por ejemplo, filas de corta longitud (títulos, etc.).</p>
+<p>La librería ofrece funciones y clases para cargar datos almacenados en archivos de texto (<code>Textos</code>) o en tablas tipo <em>csv</em> o <em>excel</em> (<code>Registros</code> y <code>Datos</code>).</p>
+<h2>Linguística</h2>
 <p>En cada texto hay que identificar frases y palabras, y definir cuales de ellas mantener para analizar y cuales filtrar. Para esto se usan filtros como listas de palabras <em>stopwords</em>, que por ser tan usuales no aportan mucho valor al análisis, o definir si solo usar palabras e ignorar números, símbolos, puntuación, etc.</p>
 <p>Para calcular sentimiento se suelen usar también listas de palabras predefinidas, que se asocian con diferentes emociones contrarias (positivas vs negativas, por ejemplo), y con base en conteos de presencia de esas palabras en el corpus se puede crear un indicador de sentimiento a lo largo del tiempo.</p>
-<p>Con base en estas consideraciones se crea la <em>Clase</em> del corpus (llamada <code>MiCorpus</code> en esta librería), que permite generar las estadísticas descriptivas y conteos de palabras requeridos en análisis posteriores. Es probablemente la estructura más importante de la librería.</p>
+<p>Con base en estas consideraciones esta librería ofrece la clase <code>Documentos</code>, que permite generar las estadísticas descriptivas y conteos de palabras requeridos en análisis posteriores. Es la estructura más importante de la librería.</p>
 <p>Esta librería se basa principalmente en <a href="https://spacy.io/">spaCy</a> para la implementación de todo el "pipeline" de procesamiento de texto.</p>
 <h2>Modelos LDA</h2>
 <p>Los modelos de tópicos son utilizados para identificar las temáticas implícitas en grandes volúmenes de documentos textuales, para así poder identificar, por ejemplo, la evolución de narrativas a lo largo del tiempo, o simplemente para tener una idea de los temas tratados en el corpus sin tener que leer cado uno de sus documentos.</p>
 <p>Esta librería usa LDA, una de múltiples técnicas para generar modelos de tópicos. Ver <a href="https://www.machinelearningplus.com/nlp/topic-modeling-gensim-python/">este artículo</a> para una explicación más detallada de la intuición dentrás de estos modelos.</p>
-<p>Esta librería usa <a href="https://radimrehurek.com/gensim/models/ldamodel.html">Gensim</a> para la implementación del cálculo de los modelos. En su <a href="https://radimrehurek.com/gensim/tutorial.html">documentación</a> encontrará todo lo necesario para correr este tipo de modelos y muchas técnicas adicionales no usadas en esta librería. <a href="https://pypi.org/project/banrep/">banrep</a> simplemente ofrece funciones para correr varios modelos LDA y seleccionar el mejor, todo basado en Gensim.</p>
+<p>Esta librería usa <a href="https://radimrehurek.com/gensim/models/ldamodel.html">Gensim</a> para la implementación del cálculo de los modelos. En su <a href="https://radimrehurek.com/gensim/tutorial.html">documentación</a> encontrará todo lo necesario para correr este tipo de modelos y muchas técnicas adicionales no usadas en esta librería. <a href="https://pypi.org/project/banrep/">banrep</a> simplemente ofrece una forma de correr varios modelos LDA y calificarlos según <a href="https://radimrehurek.com/gensim/models/coherencemodel.html">Coherence Score</a>, todo basado en Gensim.</p>
                 
                   
                 
