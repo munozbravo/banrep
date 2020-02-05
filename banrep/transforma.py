@@ -1,9 +1,12 @@
 # coding: utf-8
 """Módulo para crear modelos de transformación de texto."""
 from collections import defaultdict
+import warnings
 
 from gensim.corpora import Dictionary
+from gensim.models import CoherenceModel
 from gensim.models import Phrases
+from gensim.models.ldamodel import LdaModel
 from gensim.models.phrases import Phraser
 
 
@@ -138,3 +141,101 @@ class Bow:
             todos[frase.get("meta").get(self.id_doc)].extend(tokens)
 
         return todos
+
+
+class ModelosLda:
+    """Modelos de tópicos basados en LDA.
+
+    Itera Bags of Words de documentos y crea modelos para diferentes k.
+    """
+
+    def __init__(self, bow, kas, params):
+        """Requiere bow, kas, params.
+
+        Parameters
+        ----------
+        bow : banrep.transforma.Bow
+            Colección de documentos Bag of Words.
+        kas : Iterable[int]
+            Diferentes k tópicos para los cuales crear modelo.
+        params : dict
+            Parámetros requeridos en modelos LDA.
+            Ver https://radimrehurek.com/gensim/models/ldamodel.html
+        """
+        self.bow = bow
+        self.kas = kas
+        self.params = params
+
+        self.best = 0
+        self.score = 0
+        self.doc_ids = None
+
+    def __repr__(self):
+        fmstr = f"Mejor k={self.best} con Coherence Score={self.score:.3f}"
+        return f"Modelos LDA para k en {self.kas}: {fmstr}"
+
+    def __iter__(self):
+        """Modelo LDA para cada k.
+
+        Yields
+        ------
+        dict (k:int, modelo: gensim.models.ldamodel.LdaModel, score: float)
+        """
+        doc_ids, toks, sparsed = zip(*self.bow)
+        self.doc_ids = doc_ids
+
+        for k in self.kas:
+            modelo = self.crear_modelo(k, sparsed)
+            score = self.evaluar_modelo(modelo, toks)
+
+            if score > self.score:
+                self.score = score
+                self.best = k
+
+            yield dict(k=k, modelo=modelo, score=score)
+
+    def crear_modelo(self, k, sparsed):
+        """Crea modelo LDA de k tópicos.
+
+        Parameters
+        ----------
+        k : int
+            Número de tópicos a usar en modelo.
+        sparsed : Iterable[list(tuple(int, int))]
+            Bag of Words con id, freq de tokens.
+
+        Returns
+        -------
+        gensim.models.ldamodel.LdaModel
+            Modelo LDA de k tópicos.
+        """
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            modelo = LdaModel(
+                sparsed, num_topics=k, id2word=self.bow.id2word, **self.params
+            )
+
+        return modelo
+
+    def evaluar_modelo(self, modelo, textos):
+        """Calcula Coherence Score de modelo de tópicos.
+
+        Parameters
+        ----------
+        modelo : gensim.models.ldamodel.LdaModel
+        textos : Iterable (list[str])
+            Palabras de cada documento en un corpus.
+
+        Returns
+        -------
+        float
+            Coherencia calculada.
+        """
+        cm = CoherenceModel(
+            model=modelo,
+            texts=textos,
+            dictionary=self.bow.id2word,
+            coherence="c_v",
+        )
+
+        return cm.get_coherence()
