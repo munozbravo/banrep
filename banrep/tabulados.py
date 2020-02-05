@@ -27,6 +27,7 @@ def df_palabras(docs):
 
     return pd.concat(dfs, ignore_index=True)
 
+
 def df_frases(docs):
     """Crea DataFrame de frases en corpus.
 
@@ -68,3 +69,31 @@ def df_ngramas(ngramed):
         dfs.append(df)
 
     return pd.concat(dfs, ignore_index=True)
+
+
+def df_probables(modelo, n=15):
+    """Distribución de probabilidad de tokens en tópicos de modelo.
+
+    Parameters
+    ----------
+    modelo : gensim.models.ldamodel.LdaModel
+    n : int optional
+        Cuantos tokens incluir.
+
+    Returns
+    -------
+    pd.DataFrame
+        Tokens probables de cada tópico y sus probabilidades.
+    """
+    dfs = []
+    for topico in range(modelo.num_topics):
+        data = modelo.show_topic(topico, n)
+        df = pd.DataFrame(data=data, columns=["token", "probabilidad"])
+        df["topico"] = topico
+        dfs.append(df)
+
+    df_topicos = pd.concat(dfs, ignore_index=True)
+
+    return df_topicos.sort_values(
+        by=["topico", "probabilidad"], ascending=[True, False]
+    )
