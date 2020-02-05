@@ -60,7 +60,7 @@ guardar_texto(texto, 'mi-super-archivo.txt')
 # Extrae texto de archivos en un directorio
 # y almacena nuevos archivos en carpeta textos.
 # Devuelve el número de archivos procesados.
-n = extraer_todos('~Downloads/pubs/', 'corpus', recursivo=True, exts=None, basura=None, chars=0)
+n = extraer_todos('Downloads/pubs/', 'Downloads/corpus/', recursivo=True, exts=None, basura=None, chars=0)
 
 print(f'{n} archivos procesados')
 ```

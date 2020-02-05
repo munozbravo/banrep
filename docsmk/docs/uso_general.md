@@ -15,9 +15,9 @@ Ver [este ejemplo][ej_nbviewer] de cómo usar la librería. Le mostrará línea 
 
 ## Corpus
 
-Todo proyecto de análisis de texto empieza por definir el corpus, conjunto de documentos, a ser analizado. Esto implica cargar el texto de cada archivo, decidir si todo el texto es relevante o si debe ser pre-procesado para excluir, por ejemplo, filas de corta longitud (títulos, etc.), notas de pie de página (si el texto permite identificarlas de forma estandarizada).
+Todo proyecto de análisis de texto empieza por definir el corpus, conjunto de documentos, a ser analizado. Esto implica cargar el texto de cada archivo, decidir si todo el texto es relevante o si debe ser pre-procesado para excluir, por ejemplo, filas de corta longitud (títulos, etc.).
 
-La librería ofrece funciones para cargar datos almacenados en archivos de texto (`Textos`) o en tablas tipo *csv* o *excel* (`Registros` y `Datos`).
+La librería ofrece funciones y clases para cargar datos almacenados en archivos de texto (`Textos`) o en tablas tipo *csv* o *excel* (`Registros` y `Datos`).
 
 ## Linguística
 
@@ -25,7 +25,7 @@ En cada texto hay que identificar frases y palabras, y definir cuales de ellas m
 
 Para calcular sentimiento se suelen usar también listas de palabras predefinidas, que se asocian con diferentes emociones contrarias (positivas vs negativas, por ejemplo), y con base en conteos de presencia de esas palabras en el corpus se puede crear un indicador de sentimiento a lo largo del tiempo.
 
-Con base en estas consideraciones esta librería ofrece `Documentos`, que permite generar las estadísticas descriptivas y conteos de palabras requeridos en análisis posteriores. Es la estructura más importante de la librería.
+Con base en estas consideraciones esta librería ofrece la clase `Documentos`, que permite generar las estadísticas descriptivas y conteos de palabras requeridos en análisis posteriores. Es la estructura más importante de la librería.
 
 Esta librería se basa principalmente en [spaCy][web_spacy] para la implementación de todo el "pipeline" de procesamiento de texto.
 
@@ -39,9 +39,9 @@ Esta librería usa LDA, una de múltiples técnicas para generar modelos de tóp
 
 [articulo_lda]: https://www.machinelearningplus.com/nlp/topic-modeling-gensim-python/
 
-Esta librería usa [Gensim][web_gensim] para la implementación del cálculo de los modelos. En su [documentación][gensim_tuts] encontrará todo lo necesario para correr este tipo de modelos y muchas técnicas adicionales no usadas en esta librería. [banrep][pypi_banrep] simplemente ofrece funciones para correr varios modelos LDA y seleccionar el mejor, todo basado en Gensim.
+Esta librería usa [Gensim][web_gensim] para la implementación del cálculo de los modelos. En su [documentación][gensim_tuts] encontrará todo lo necesario para correr este tipo de modelos y muchas técnicas adicionales no usadas en esta librería. [banrep][pypi_banrep] simplemente ofrece una forma de correr varios modelos LDA y calificarlos según [Coherence Score][gensim_score], todo basado en Gensim.
 
 [web_gensim]: https://radimrehurek.com/gensim/models/ldamodel.html
 [gensim_tuts]: https://radimrehurek.com/gensim/tutorial.html
 [pypi_banrep]: https://pypi.org/project/banrep/
-
+[gensim_score]: https://radimrehurek.com/gensim/models/coherencemodel.html

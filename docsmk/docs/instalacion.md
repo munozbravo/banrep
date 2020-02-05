@@ -19,7 +19,6 @@ Desde la *línea de comandos* ([Terminal][terminal] en macOS, [Anaconda Prompt][
 [terminal]: https://support.apple.com/guide/terminal/welcome/mac
 [anacondocs]: https://docs.anaconda.com/anaconda/install/verify-install/
 
-
 ```bash
 # crear un entorno...
 ~$ conda create --name entorno python=3.7 pip jupyterlab

@@ -1,10 +1,9 @@
 # BanRep: Analítica de Texto
 
-[banrep][pypi_banrep] es una librería en Python para analizar conjuntos de documentos textuales. Ofrece las funciones usadas recurrentemente en el [Banco de la República][web_banrep] para el análisis de texto, y facilita los pasos preparatorios para el análisis.
-
-[web_banrep]: http://www.banrep.gov.co/
+[banrep][pypi_banrep] es una librería en Python para analizar conjuntos de documentos textuales. Ofrece las funciones usadas recurrentemente en el [Banco de la República][web_banrep] para el preprocesamiento y análisis de texto.
 
 [pypi_banrep]: https://pypi.org/project/banrep/
+[web_banrep]: http://www.banrep.gov.co/
 
 ----
 
