@@ -162,7 +162,7 @@ urllib3==1.25.7
 wasabi==0.6.0
 wcwidth==0.1.8
 webencodings==0.5.1
-Werkzeug==0.15.2
+Werkzeug==0.15.3
 widgetsnbextension==3.5.1
 wily==1.12.2
 wordcloud==1.6.0
