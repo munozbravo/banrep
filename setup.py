@@ -30,10 +30,11 @@ setup(
     python_requires="~=3.7",
     include_package_data=True,
     install_requires=[
-        "gensim>=3.4",
-        "pandas>=0.24",
-        "spacy>=2.1",
+        "gensim>=3.8",
+        "pandas>=1.0",
+        "spacy>=2.2",
         "tika>=1.19",
-        "lxml>=4.3.3",
+        "lxml>=4.5",
+        "xlrd>=1.2",
     ],
 )
