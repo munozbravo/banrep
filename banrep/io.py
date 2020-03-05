@@ -125,7 +125,6 @@ def guardar_texto(texto, archivo):
         for fila in texto.splitlines():
             ruta.write(fila)
             ruta.write("\n")
-            ruta.write("\n")
 
 
 def leer_jsonl(archivo):
@@ -250,7 +249,7 @@ class Textos:
         aleatorio=False,
         exts=None,
         chars=0,
-        parrafos=False,
+        parrafos=True,
     ):
         """Requiere: carpeta. Opcional: recursivo, aleatorio, exts, chars, párrafos.
 
@@ -307,18 +306,22 @@ class Textos:
                 if self.chars:
                     texto = filtrar_cortas(texto, chars=self.chars)
 
-                comun = {"archivo": archivo.name, "fuente": archivo.parent.name}
+                comun = {
+                    "id_file": f"{self.n:0>7}",
+                    "archivo": archivo.name,
+                    "fuente": archivo.parent.name,
+                }
 
                 if self.parrafos:
                     for p in texto.splitlines():
                         if p:
-                            info = {"id_doc": f"{ndoc:0>7}", **comun}
+                            info = {"id": f"{ndoc:0>7}", **comun}
                             ndoc += 1
 
                             yield p, info
 
                 else:
-                    meta = {"id_doc": f"{ndoc:0>7}", **comun}
+                    meta = {"id": f"{ndoc:0>7}", **comun}
                     ndoc += 1
 
                     yield texto, meta
