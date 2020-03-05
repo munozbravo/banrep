@@ -239,19 +239,13 @@ def crear_txts(df, col_id, textcol, carpeta):
 class Textos:
     """Colección de textos almacenados en archivos planos en carpeta.
 
-    Itera archivos y extrae texto y metadata a considerar como documento.
+    Itera archivos y extrae texto y metadata de cada párrafo.
     """
 
     def __init__(
-        self,
-        carpeta,
-        recursivo=False,
-        aleatorio=False,
-        exts=None,
-        chars=0,
-        parrafos=True,
+        self, carpeta, recursivo=False, aleatorio=False, exts=None, chars=0,
     ):
-        """Requiere: carpeta. Opcional: recursivo, aleatorio, exts, chars, párrafos.
+        """Requiere: carpeta. Opcional: recursivo, aleatorio, exts, chars.
 
         Parameters
         ----------
@@ -265,34 +259,35 @@ class Textos:
             Solo considerar estas extensiones de archivo.
         chars : int
             Mínimo número de caracteres en una línea de texto.
-        parrafos : bool
-            Considerar cada párrafo como documento.
         """
         self.absoluto = Path(carpeta).resolve()
         self.recursivo = recursivo
         self.aleatorio = aleatorio
         self.exts = exts
         self.chars = chars
-        self.parrafos = parrafos
 
         self.n = 0
+        self.nprg = 0
 
     def __len__(self):
-        return self.n
+        return self.n, self.nprg
 
     def __repr__(self):
-        return f"{self.__len__()} archivos leídos de carpeta {self.absoluto.name}."
+        n, nprg = self.__len__()
+        fp = self.absoluto.name
+
+        return f"{n} archivos y {nprg} párrafos, de carpeta '{fp}'."
 
     def __iter__(self):
-        """Itera archivos y extrae texto y metadata de cada archivo.
+        """Itera archivos y extrae texto y metadata de cada párrafo.
 
         Yields
         ------
         tuple (str, dict)
-            Texto y metadata de cada documento.
+            Texto y metadata de cada párrafo.
         """
         self.n = 0
-        ndoc = 1
+        self.nprg = 0
 
         for archivo in iterar_rutas(
             self.absoluto,
@@ -312,19 +307,12 @@ class Textos:
                     "fuente": archivo.parent.name,
                 }
 
-                if self.parrafos:
-                    for p in texto.splitlines():
-                        if p:
-                            info = {"id": f"{ndoc:0>7}", **comun}
-                            ndoc += 1
+                for parag in texto.splitlines():
+                    if parag:
+                        self.nprg += 1
+                        meta = {"id_parag": f"{self.nprg:0>7}", **comun}
 
-                            yield p, info
-
-                else:
-                    meta = {"id": f"{ndoc:0>7}", **comun}
-                    ndoc += 1
-
-                    yield texto, meta
+                        yield parag, meta
 
 
 class Datos:

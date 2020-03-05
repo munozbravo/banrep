@@ -60,9 +60,12 @@ class Documentos:
         """
         self.n = 0
         for doc, meta in self.lang.pipe(self.datos, as_tuples=True):
-            for frase in self.detalles_doc(doc, meta):
-                yield frase
+            for frase in self.detalles_doc(doc):
                 self.n += 1
+                frase["meta"] = meta.copy()
+                frase["meta"].update({"id_sent": f"{self.n:0>7}"})
+
+                yield frase
 
     def extensiones(self):
         """Crea lista de extensiones a usar."""
@@ -208,29 +211,23 @@ class Documentos:
 
         return anotaciones
 
-    def detalles_doc(self, doc, meta):
+    def detalles_doc(self, doc):
         """Obtiene detalles lingüísticos de documento.
 
         Parameters
         ----------
         doc : spacy.tokens.Doc
-        meta : dict
 
         Yields
         ------
-        dict (text: str, tokens: list, meta: dict)
+        dict (text: str, tokens: list)
             Anotaciones lingüísticas de cada frase.
         """
-        id_sent = 1
         for sent in doc.sents:
             tokens = [self.token_features(t) for t in sent if t._.get("ok_token")]
             if len(tokens) > self.tk:
                 frase = {}
                 frase["text"] = sent.text
                 frase["tokens"] = tokens
-                frase["meta"] = meta.copy()
-                frase["meta"].update({"id_sent": f"{id_sent:0>5}"})
-
-                id_sent += 1
 
                 yield frase
