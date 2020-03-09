@@ -15,12 +15,12 @@ def crear_carpeta(nombre):
     Si no es ruta absoluta será creada relativo a carpeta de trabajo.
 
     Parameters
-    -------------
+    ----------
     nombre : str | Path
         Nombre de carpeta a crear.
 
     Returns
-    ---------
+    -------
     Path
         Ruta absoluta de carpeta.
     """
@@ -111,15 +111,11 @@ def guardar_texto(texto, archivo):
     """Guarda texto en un archivo.
 
     Parameters
-    -------------
+    ----------
     texto : str
         Texto que se quiere guardar.
     archivo : str | Path
         Ruta del archivo en el cual se quiere guardar texto.
-
-    Returns
-    ---------
-    None
     """
     with open(archivo, "w", newline="\n", encoding="utf-8") as ruta:
         for fila in texto.splitlines():
@@ -169,10 +165,6 @@ def guardar_jsonl(archivo, objs):
         Ruta del archivo en el cual se quiere guardar objetos json.
     objs : Iterable[dict]
         Contenido de cada objeto json a guardar.
-
-    Returns
-    -------
-    None
     """
     ruta = Path(archivo).resolve()
     nombre = ruta.name
@@ -224,10 +216,6 @@ def crear_txts(df, col_id, textcol, carpeta):
         Nombre de columna que contiene texto en sus filas.
     carpeta: str | Path
         Directorio en donde se quiere guardar los archivos de texto.
-
-    Returns
-    ---------
-    None
     """
     salida = Path(carpeta).resolve()
     df["nombres"] = df[col_id].apply(lambda x: salida.joinpath(f"{x}.txt"))

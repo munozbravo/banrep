@@ -83,7 +83,7 @@ class Bow:
     """
 
     def __init__(self, docs, ngrams, id_doc, id2word=None):
-        """Requiere docs, ngramas, id_doc. Opcional: id2word.
+        """Requiere docs, ngrams, id_doc. Opcional: id2word.
 
         Parameters
         ----------

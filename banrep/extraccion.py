@@ -14,12 +14,12 @@ def extraer_info(archivo):
     """Extrae contenido y metadata de archivo.
 
     Parameters
-    -------------
+    ----------
     archivo : str | Path
         Ruta del archivo del cual se quiere extraer texto y metadata.
 
     Returns
-    ---------
+    -------
     tuple (str, dict)
         Content y Metadata.
     """
@@ -75,7 +75,7 @@ def extraer_todos(dirin, dirout, recursivo=False, exts=None, basura=None, chars=
     """Extrae y guarda texto y metadata de archivos.
 
     Parameters
-    -------------
+    ----------
     dirin : str | Path
         Directorio donde están los documentos originales.
     dirout : str | Path
@@ -90,7 +90,7 @@ def extraer_todos(dirin, dirout, recursivo=False, exts=None, basura=None, chars=
         Mínimo número de caracteres en una línea de texto.
 
     Returns
-    ---------
+    -------
     int
         Número de documentos procesados.
     """
