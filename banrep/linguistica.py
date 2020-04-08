@@ -5,7 +5,7 @@ from spacy.pipeline import EntityRuler
 from spacy.tokens import Token
 
 
-class Documentos:
+class Frases:
     """Anotaciones lingüísticas de cada frase en corpus.
 
     Parameters
