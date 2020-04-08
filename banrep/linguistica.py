@@ -6,29 +6,34 @@ from spacy.tokens import Token
 
 
 class Documentos:
-    """Colección de frases de documentos, procesadas lingüísticamente.
+    """Anotaciones lingüísticas de cada frase en corpus.
 
-    Itera documentos y obtiene anotaciones lingüísticas de cada frase.
+    Parameters
+    ----------
+    lang : spacy.language.Language
+        Modelo de lenguaje spaCy.
+    datos : Iterable (str, dict)
+        Información de cada documento (texto, metadata).
+    tk : int, optional
+        Filtro para número mínimo de tokens válidos en frases.
+    filtros : dict, optional
+        Filtros a evaluar en cada token.
+        (is_alpha, lower_, pos_, dep_, ent_type_, chars)
+    grupos : dict (str: set), optional
+        Grupos de listas de palabras a identificar.
+    entes : dict (str: set), optional
+        Grupos de expresiones a considerar como Entities.
+
+    Yields
+    ------
+    dict (text: str, tokens: list[dict], meta: dict)
+        Anotaciones lingüísticas de cada frase.
     """
 
     def __init__(self, lang, datos, tk=0, filtros=None, grupos=None, entes=None):
-        """Requiere: lang, datos. Opcional tk, filtros, grupos, entes.
+        """Requiere: lang, datos.
 
-        Parameters
-        ----------
-        lang : spacy.language.Language
-            Modelo de lenguaje spaCy.
-        datos : Iterable (str, dict)
-            Información de cada documento (texto, metadata).
-        tk : int, optional
-            Filtro para número mínimo de tokens válidos en frases.
-        filtros : dict, optional
-            Filtros a evaluar en cada token.
-            (is_alpha, lower_, pos_, dep_, ent_type_, chars)
-        grupos : dict (str: set), optional
-            Grupos de listas de palabras a identificar.
-        entes : dict (str: set), optional
-            Grupos de expresiones a considerar como Entities.
+        Opcional tk, filtros, grupos, entes.
         """
         self.lang = lang
         self.datos = datos
@@ -51,13 +56,7 @@ class Documentos:
         return f"{self.__len__()} frases procesadas lingüísticamente."
 
     def __iter__(self):
-        """Itera documentos procesados lingüísticamente.
-
-        Yields
-        ------
-        dict (text: str, tokens: list, meta: dict)
-            Anotaciones lingüísticas de cada frase.
-        """
+        """Anotaciones lingüísticas de cada frase."""
         self.n = 0
         for doc, meta in self.lang.pipe(self.datos, as_tuples=True):
             for frase in self.detalles_doc(doc):
