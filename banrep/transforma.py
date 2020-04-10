@@ -1,6 +1,7 @@
 # coding: utf-8
 """Módulo para crear modelos de transformación de texto."""
 from collections import defaultdict
+from itertools import groupby
 import warnings
 
 from gensim.corpora import Dictionary
@@ -10,183 +11,183 @@ from gensim.models.ldamodel import LdaModel
 from gensim.models.phrases import Phraser
 
 
-def frases_de_palabras(docs):
-    """Extrae palabras de cada frase.
+class NgramFrases:
+    """Info de frases incluyendo n-gramas.
 
     Parameters
     ----------
-    docs : Iterable[dict (text: str, tokens: list, meta: dict)]
+    frases : Iterable[dict (text: str, tokens: list[dict], meta: dict)]
         Anotaciones lingüísticas de cada frase.
-
-    Yields
-    ------
-    tuple (list, dict (text: str, tokens: list, meta: dict))
-        Palabras de cada frase y Anotaciones lingüísticas.
-    """
-    for frase in docs:
-        yield [t.get("lower_") for t in frase.get("tokens")], frase
-
-
-def model_ngrams(docs, th=10.0):
-    """Crea modelos de ngramas a partir de corpus.
-
-    Parameters
-    ----------
-    docs : Iterable[dict (text: str, tokens: list, meta: dict)]
-        Anotaciones lingüísticas de cada frase.
+    attr : str
+        Atributo a usar como texto de cada token (text | lower_)
     th : float
         Score Threshold para formar n-gramas.
         Ver https://radimrehurek.com/gensim/models/phrases.html
 
-    Returns
-    -------
-    dict
-        Modelos Phraser para bigramas y trigramas
+    Yields
+    ------
+    dict (text: str, tokens: list[str], meta: dict)
+        Info de cada frase incluyendo n-gramas.
     """
-    g = (words for words, frase in frases_de_palabras(docs))
-    big = Phrases(g, threshold=th)
-    bigrams = Phraser(big)
 
-    g = (words for words, frase in frases_de_palabras(docs))
-    trig = Phrases(bigrams[g], threshold=th)
-    trigrams = Phraser(trig)
+    def __init__(self, frases, attr="lower_", th=10.0):
+        """Requiere: frases.
 
-    return dict(bigrams=bigrams, trigrams=trigrams)
+        Opcional attr, th.
+        """
+        self.frases = frases
+        self.attr = attr
+        self.th = th
+
+        self.models = self.crear_modelos()
+
+    def __iter__(self):
+        """Info de cada frase incluyendo n-gramas."""
+        big = self.models.get("bigrams")
+        trig = self.models.get("trigrams")
+
+        for frase in self.frases:
+            info = frase.copy()
+            tokens = [t.get(self.attr) for t in frase.get("tokens")]
+            info["tokens"] = trig[big[tokens]]
+
+            yield info
+
+    def solo_tokens(self):
+        """Extrae tokens de cada frase.
+
+        Yields
+        ------
+        list[str]
+            Tokens de cada frase.
+        """
+        for frase in self.frases:
+            yield [t.get(self.attr) for t in frase.get("tokens")]
+
+    def crear_modelos(self):
+        """Crea modelos de n-gramas.
+
+        Returns
+        -------
+        dict
+            Modelos Phraser para bigramas y trigramas.
+        """
+        g = (tokens for tokens in self.solo_tokens())
+        big = Phrases(g, threshold=self.th)
+        bigrams = Phraser(big)
+
+        g = (tokens for tokens in self.solo_tokens())
+        trig = Phrases(bigrams[g], threshold=self.th)
+        trigrams = Phraser(trig)
+
+        return dict(bigrams=bigrams, trigrams=trigrams)
 
 
-def ngram_frases(docs, ngrams):
-    """Extrae tokens (palabras y n-gramas) de cada frase.
+class Bags:
+    """Documentos como Bag Of Words.
 
     Parameters
     ----------
-    docs : Iterable[dict (text: str, tokens: list, meta: dict)]
-        Anotaciones lingüísticas de cada frase.
-    ngrams : dict (str, gensim.models.phrases.Phraser)
-        Modelos de n-gramas (bigrams, trigrams).
+    frases : Iterable[dict (text: str, tokens: list, meta: dict)]
+        Anotaciones lingüísticas o Info de cada frase.
+    idm : str
+        Llave de Metadata para agrupar.
+    attr : str | None
+        Atributo a usar de token (text | lower_). None si ngramas.
+    vocab : gensim.corpora.Dictionary, optional
+        Vocabulario a considerar.
 
     Yields
     ------
-    tuple (list, dict (text: str, tokens: list, meta: dict))
-        Palabras y n-gramas de cada frase, y Anotaciones lingüísticas.
-    """
-    bigrams = ngrams.get("bigrams")
-    trigrams = ngrams.get("trigrams")
-
-    for words, frase in frases_de_palabras(docs):
-        yield list(trigrams[bigrams[words]]), frase
-
-
-class Bow:
-    """Colección de documentos Bag Of Words.
-
-    Itera frases de documentos y obtiene las palabras de cada uno.
+    dict (idm: str, tokens: list[str], sparsed: list[tuple(int, int)])
+        Bags of Words de cada documento.
     """
 
-    def __init__(self, docs, ngrams, id_doc, id2word=None):
-        """Requiere docs, ngrams, id_doc. Opcional: id2word.
+    def __init__(self, frases, idm, attr=None, vocab=None):
+        """Requiere frases, idm.
 
-        Parameters
-        ----------
-        docs : Iterable[dict (text: str, tokens: list, meta: dict)]
-            Anotaciones lingüísticas de cada frase.
-        ngrams : dict (str: gensim.models.phrases.Phraser)
-            Modelos de n-gramas (bigrams, trigrams).
-        id_doc : str
-            Llave de Metadata que identifica documentos.
-        id2word : gensim.corpora.Dictionary, optional
-            Diccionario de tokens a considerar.
+        Opcional: attr, vocab.
         """
-        self.docs = docs
-        self.ngrams = ngrams
-        self.id_doc = id_doc
-        self.id2word = id2word
+        self.frases = frases
+        self.idm = idm
+        self.attr = attr
+        self.vocab = vocab
 
         self.n = 0
 
-        if not self.id2word:
-            self.id2word = Dictionary(
-                tokens for tokens, frase in ngram_frases(self.docs, self.ngrams)
-            )
-            print(f"Diccionario con {len(self.id2word)} términos creado...")
+        if not self.vocab:
+            self.vocab = self.crear_vocab()
+            print(f"Diccionario con {len(self.vocab)} términos creado...")
 
     def __len__(self):
         return self.n
 
     def __repr__(self):
-        return f"BOW: {self.__len__()} documentos y {len(self.id2word)} términos."
+        return f"{self.__len__()} documentos y {len(self.vocab)} términos."
 
     def __iter__(self):
-        """Tokens de cada documento como Bag Of Words.
-
-        Yields
-        ------
-        tuple (str, list(str), list(tuple(int, int)))
-            Identificación única de cada documento y Bags of Words.
-        """
+        """Bags Of Words de cada documento."""
         self.n = 0
-        for id_doc, tokens in self.doc_tokens().items():
-            yield id_doc, tokens, self.id2word.doc2bow(tokens)
+        for k, g in groupby(self.frases, lambda x: x.get("meta").get(self.idm)):
+            dtoks = []
+            for frase in g:
+                if self.attr:
+                    tokens = [t.get(self.attr) for t in frase.get("tokens")]
+                else:
+                    tokens = frase.get("tokens")
+
+                dtoks.extend(tokens)
+
             self.n += 1
+            yield dict(idm=k, tokens=dtoks, sparsed=self.vocab.doc2bow(dtoks))
 
-    def doc_tokens(self):
-        """Tokens de cada documento, ya con ngramas.
-
-        Returns
-        -------
-        dict (str, list(str))
-            Tokens de un documento.
-        """
-        todos = defaultdict(list)
-        for tokens, frase in ngram_frases(self.docs, self.ngrams):
-            todos[frase.get("meta").get(self.id_doc)].extend(tokens)
-
-        return todos
+    def crear_vocab(self):
+        """Crea diccionario de términos presentes."""
+        if self.attr:
+            return Dictionary(
+                [t.get(self.attr) for t in frase.get("tokens")] for frase in self.frases
+            )
+        else:
+            return Dictionary(frase.get("tokens") for frase in self.frases)
 
 
-class ModelosLda:
+class Topicos:
     """Modelos de tópicos basados en LDA.
 
-    Itera Bags of Words de documentos y crea modelos para diferentes k.
+    Parameters
+    ----------
+    bags : banrep.transforma.Bags
+        Bags of Words de documentos.
+    kas : Iterable[int]
+        Diferentes k tópicos para los cuales crear modelo.
+    params : dict
+        Parámetros requeridos en modelos LDA.
+        Ver https://radimrehurek.com/gensim/models/ldamodel.html
+
+    Yields
+    ------
+    dict (k:int, modelo: gensim.models.ldamodel.LdaModel, score: float)
+        Modelo de Tópicos para cada k.
     """
 
-    def __init__(self, bow, kas, params):
-        """Requiere bow, kas, params.
-
-        Parameters
-        ----------
-        bow : banrep.transforma.Bow
-            Colección de documentos Bag of Words.
-        kas : Iterable[int]
-            Diferentes k tópicos para los cuales crear modelo.
-        params : dict
-            Parámetros requeridos en modelos LDA.
-            Ver https://radimrehurek.com/gensim/models/ldamodel.html
-        """
-        self.bow = bow
+    def __init__(self, bags, kas, params):
+        """Requiere bags, kas, params."""
+        self.bags = bags
         self.kas = kas
         self.params = params
 
         self.best = 0
         self.score = 0
-        self.doc_ids = None
 
     def __repr__(self):
         fmstr = f"Mejor k={self.best} con Coherence Score={self.score:.3f}"
         return f"Modelos LDA para k en {self.kas}: {fmstr}"
 
     def __iter__(self):
-        """Modelo LDA para cada k.
-
-        Yields
-        ------
-        dict (k:int, modelo: gensim.models.ldamodel.LdaModel, score: float)
-        """
-        doc_ids, toks, sparsed = zip(*self.bow)
-        self.doc_ids = doc_ids
-
+        """Modelo LDA para cada k."""
         for k in self.kas:
-            modelo = self.crear_modelo(k, sparsed)
-            score = self.evaluar_modelo(modelo, toks)
+            modelo = self.crear_modelo(k, [b.get("sparsed") for b in self.bags])
+            score = self.evaluar(modelo, [b.get("tokens") for b in self.bags])
 
             if score > self.score:
                 self.score = score
@@ -212,12 +213,12 @@ class ModelosLda:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             modelo = LdaModel(
-                sparsed, num_topics=k, id2word=self.bow.id2word, **self.params
+                sparsed, num_topics=k, id2word=self.bags.vocab, **self.params
             )
 
         return modelo
 
-    def evaluar_modelo(self, modelo, textos):
+    def evaluar(self, modelo, textos):
         """Calcula Coherence Score de modelo de tópicos.
 
         Parameters
@@ -232,10 +233,7 @@ class ModelosLda:
             Coherencia calculada.
         """
         cm = CoherenceModel(
-            model=modelo,
-            texts=textos,
-            dictionary=self.bow.id2word,
-            coherence="c_v",
+            model=modelo, texts=textos, dictionary=self.bags.vocab, coherence="c_v",
         )
 
         return cm.get_coherence()
