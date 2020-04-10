@@ -1,8 +1,11 @@
 # coding: utf-8
 """Módulo para procesar documentos lingüísticamente."""
+import logging
 
 from spacy.pipeline import EntityRuler
 from spacy.tokens import Token
+
+logger = logging.getLogger(__name__)
 
 
 class Frases:
@@ -63,6 +66,10 @@ class Frases:
                 self.n += 1
                 frase["meta"] = meta.copy()
                 frase["meta"].update({"id_sent": f"{self.n:0>7}"})
+
+                if self.n % 50000 == 0:
+                        msg = self.__repr__()
+                        logger.info(msg)
 
                 yield frase
 

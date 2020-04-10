@@ -1,12 +1,15 @@
 # coding: utf-8
 """Módulo de interacción con el sistema, lectura y escritura."""
 from pathlib import Path
+import logging
 import json
 import random
 
 import pandas as pd
 
 from banrep.preprocesos import filtrar_cortas
+
+logger = logging.getLogger(__name__)
 
 
 def crear_carpeta(nombre):
@@ -95,13 +98,13 @@ def leer_texto(archivo):
             texto = f.read()
 
     except OSError:
-        print(f"No puede abrirse archivo {nombre} en {carpeta}.")
+        logger.info(f"No puede abrirse archivo {nombre} en {carpeta}.")
         texto = ""
     except UnicodeDecodeError:
-        print(f"No puede leerse archivo {nombre} en {carpeta}.")
+        logger.info(f"No puede leerse archivo {nombre} en {carpeta}.")
         texto = ""
     except Exception:
-        print(f"Error inesperado leyendo {nombre} en {carpeta}")
+        logger.info(f"Error inesperado leyendo {nombre} en {carpeta}")
         texto = ""
 
     return texto
@@ -145,15 +148,20 @@ def leer_jsonl(archivo):
             for line in f:
                 try:
                     yield json.loads(line.strip())
+
+                except json.JSONDecodeError:
+                    msg = f"Ignorando fila de archivo {nombre} en {carpeta}."
+                    logger.info(msg)
                 except ValueError:
-                    print(f"Ignorando registro de archivo {nombre} en {carpeta}.")
+                    msg = f"Ignorando fila de archivo {nombre} en {carpeta}."
+                    logger.info(msg)
 
     except OSError:
-        print(f"No puede abrirse archivo {nombre} en {carpeta}.")
+        logger.info(f"No puede abrirse archivo {nombre} en {carpeta}.")
     except UnicodeDecodeError:
-        print(f"No puede leerse archivo {nombre} en {carpeta}.")
+        logger.info(f"No puede leerse archivo {nombre} en {carpeta}.")
     except Exception:
-        print(f"Error inesperado leyendo {nombre} en {carpeta}")
+        logger.info(f"Error inesperado leyendo {nombre} en {carpeta}")
 
 
 def guardar_jsonl(archivo, objs):
@@ -175,7 +183,7 @@ def guardar_jsonl(archivo, objs):
             f.write("\n")
             n += 1
 
-    print(f"Guardados {n} registros en {nombre}")
+    logger.info(f"Guardados {n} registros en {nombre}")
 
 
 def leer_palabras(archivo, hoja, c_grupo, c_palabras):
@@ -269,7 +277,7 @@ class Textos:
         n, nprg = self.__len__()
         fp = self.absoluto.name
 
-        return f"{n} archivos y {nprg} párrafos, de carpeta '{fp}'."
+        return f"{nprg} párrafos leídos de {n} archivos en carpeta '{fp}'."
 
     def __iter__(self):
         """Texto y metadata de cada párrafo."""
@@ -298,6 +306,10 @@ class Textos:
                     if parag:
                         self.nprg += 1
                         meta = {"id_parag": f"{self.nprg:0>7}", **comun}
+
+                        if self.nprg % 10000 == 0:
+                            msg = self.__repr__()
+                            logger.info(msg)
 
                         yield parag, meta
 

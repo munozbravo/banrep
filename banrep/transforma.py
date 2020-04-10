@@ -2,6 +2,7 @@
 """Módulo para crear modelos de transformación de texto."""
 from collections import defaultdict
 from itertools import groupby
+import logging
 import warnings
 
 from gensim.corpora import Dictionary
@@ -9,6 +10,8 @@ from gensim.models import CoherenceModel
 from gensim.models import Phrases
 from gensim.models.ldamodel import LdaModel
 from gensim.models.phrases import Phraser
+
+logger = logging.getLogger(__name__)
 
 
 class NgramFrases:
@@ -76,9 +79,13 @@ class NgramFrases:
         big = Phrases(g, threshold=self.th)
         bigrams = Phraser(big)
 
+        logger.info("Modelo de bi-gramas creado.")
+
         g = (tokens for tokens in self.solo_tokens())
         trig = Phrases(bigrams[g], threshold=self.th)
         trigrams = Phraser(trig)
+
+        logger.info("Modelo de tri-gramas creado.")
 
         return dict(bigrams=bigrams, trigrams=trigrams)
 
@@ -117,7 +124,7 @@ class Bags:
 
         if not self.vocab:
             self.vocab = self.crear_vocab()
-            print(f"Diccionario con {len(self.vocab)} términos creado...")
+            logger.info(f"Diccionario con {len(self.vocab)} términos creado...")
 
     def __len__(self):
         return self.n
@@ -188,6 +195,8 @@ class Topicos:
         for k in self.kas:
             modelo = self.crear_modelo(k, [b.get("sparsed") for b in self.bags])
             score = self.evaluar(modelo, [b.get("tokens") for b in self.bags])
+
+            logger.info(f"Modelo de {k} tópicos creado y evaluado.")
 
             if score > self.score:
                 self.score = score
