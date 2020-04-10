@@ -8,6 +8,7 @@
 bigrams
 trigrams
 id2word
+vocab
 
 # vscode stuff #
 ########
